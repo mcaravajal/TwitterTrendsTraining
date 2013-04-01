@@ -11,8 +11,21 @@
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
-    shell:SystemTray.IsVisible="True">
+    shell:SystemTray.IsVisible="True"
+    DataContext="{Binding RelativeSource={RelativeSource self}}">
 
+    <phone:PhoneApplicationPage.Resources>
+        <DataTemplate x:Key="ListTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width=".2*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+            <TextBlock x:Name="Index" Text="{Binding trend_index}" Grid.Column="0"/>
+            <TextBlock x:Name="Name" Text="{Binding name}" Grid.Column="1"/>
+            </Grid>
+        </DataTemplate>
+    </phone:PhoneApplicationPage.Resources>
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <Grid.RowDefinitions>
@@ -27,7 +40,7 @@
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"></Grid>
+        <ListBox ItemTemplate="{StaticResource ListTemplate}" ItemsSource="{Binding trends}"  x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"></ListBox>
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->

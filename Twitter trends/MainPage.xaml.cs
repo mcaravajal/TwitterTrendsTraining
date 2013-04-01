@@ -20,5 +20,10 @@ namespace Twitter_trends
         {
             InitializeComponent();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.NavigationService.Navigate(new Uri("/TrendTopic.xaml", UriKind.Relative));
+        }
     }
 }
