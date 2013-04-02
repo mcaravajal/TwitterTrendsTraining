@@ -22,30 +22,38 @@ namespace Twitter_trends
         const string GetTrendsUri = "v2/trends.json?api_key=";
         const string BaseAddres = "http://api.whatthetrend.com/api/";
 
-        public static void GetTrends(Action<IEnumerable<Trend>> Results=null,Action<Exception> OnError=null)
+        public static void GetTrends(Action<IEnumerable<Trend>> Results=null,Action<Exception> OnError=null,Action Finally=null)
         {
             WebClient Client = new WebClient();
             Client.OpenReadCompleted += delegate(object sender, OpenReadCompletedEventArgs e)
             {
-                if (e.Error != null)
+                try
                 {
-                    if (OnError != null)
+                    if (e.Error != null)
                     {
-                        OnError(e.Error);
+                        if (OnError != null)
+                        {
+                            OnError(e.Error);
+                        }
+                    }
+                    else
+                    {
+                        Stream stream = e.Result;
+                        DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(TrendsResults));
+                        TrendsResults results = (TrendsResults)json.ReadObject(stream);
+                        if (Results != null)
+                        {
+                            Results(results.trends);
+                        }
                     }
                 }
-                else
+                finally
                 {
-                    Stream stream = e.Result;
-                    DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(TrendsResults));
-                    TrendsResults results = (TrendsResults)json.ReadObject(stream);
-                    if (Results!=null)
-                    {
-                        Results(results.trends);
-                    }
+                    Finally();
                 }
             };
             Client.OpenReadAsync(new Uri(BaseAddres + GetTrendsUri + ApiKey));
+            
         }
     }
 }

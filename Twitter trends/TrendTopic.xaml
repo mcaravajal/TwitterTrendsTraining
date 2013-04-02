@@ -16,14 +16,10 @@
 
     <phone:PhoneApplicationPage.Resources>
         <DataTemplate x:Key="ListTemplate">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width=".2*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-            <TextBlock x:Name="Index" Text="{Binding trend_index}" Grid.Column="0"/>
-            <TextBlock x:Name="Name" Text="{Binding name}" Grid.Column="1"/>
-            </Grid>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="Index" Text="{Binding trend_index}" TextAlignment="Center" Grid.Column="0" FontSize="32" Margin="0,15,0,0" Foreground="DeepSkyBlue"/>
+                <TextBlock x:Name="Name" Text="{Binding name}" Grid.Column="1" FontSize="32" Margin="15,15,5,0" />
+            </StackPanel>
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
     <!--LayoutRoot is the root grid where all page content is placed-->
@@ -35,12 +31,11 @@
 
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-            <TextBlock x:Name="ApplicationTitle" Text="MY APPLICATION" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock x:Name="PageTitle" Text="page name" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+            <TextBlock x:Name="PageTitle" Text="Top Trends" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" />
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <ListBox ItemTemplate="{StaticResource ListTemplate}" ItemsSource="{Binding trends}"  x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0"></ListBox>
+        <ListBox ItemTemplate="{StaticResource ListTemplate}"  ItemsSource="{Binding trends}"  x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0" ></ListBox>
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->

@@ -99,7 +99,7 @@ namespace Twitter_trends
             if (System.Diagnostics.Debugger.IsAttached)
             {
                 // An unhandled exception has occurred; break into the debugger
-                System.Diagnostics.Debugger.Break();
+                    System.Diagnostics.Debugger.Break();
             }
         }
 
