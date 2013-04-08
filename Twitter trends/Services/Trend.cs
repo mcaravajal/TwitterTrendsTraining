@@ -21,6 +21,7 @@ using System.Runtime.Serialization;
 
 namespace Twitter_trends.Services
 {
+    #region TrendDescription
     /// <summary>
     /// Model for twitter trend description
     /// </summary>
@@ -48,7 +49,8 @@ namespace Twitter_trends.Services
         [DataMember]
         public int score { get; set; }
     }
-
+    #endregion
+    #region Trend
     /// <summary>
     /// Model for twitter trend
     /// </summary>
@@ -56,7 +58,7 @@ namespace Twitter_trends.Services
     public class Trend : INotifyPropertyChanged
     {
         private ObservableCollection<Twit> _twits;
-
+        
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
@@ -70,21 +72,19 @@ namespace Twitter_trends.Services
         /// <value>The first_trended_at.</value>
         [DataMember]
         public DateTime first_trended_at { get; set; }
-
         /// <summary>
         /// Gets or sets the last_trended_at.
         /// </summary>
         /// <value>The last_trended_at.</value>
         [DataMember]
         public DateTime last_trended_at { get; set; }
-
+        
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
         /// <value>The name.</value>
         [DataMember]
         public string name { get; set; }
-
         /// <summary>
         /// Gets or sets the newly_trending.
         /// </summary>
@@ -126,6 +126,19 @@ namespace Twitter_trends.Services
         /// <value>The category_name.</value>
         [DataMember]
         public string category_name { get; set; }
+        /// <summary>
+        /// Gets or sets the place_name.
+        /// </summary>
+        /// <value>The place_name.</value>
+        [DataMember]
+        public string place_name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the slug.
+        /// </summary>
+        /// <value>The trend encoded for a search.</value>
+        [DataMember]
+        public string slug { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="Trend"/> is locked.
@@ -145,7 +158,7 @@ namespace Twitter_trends.Services
                 return string.Format("#{0} {1}", trend_index, name);
             }
         }
-
+        
         /// <summary>
         /// Gets or sets the twits.
         /// </summary>
@@ -162,7 +175,6 @@ namespace Twitter_trends.Services
                 }
             }
         }
-
         /// <summary>
         /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
         /// </summary>
@@ -209,7 +221,8 @@ namespace Twitter_trends.Services
 
         #endregion
     }
-
+    #endregion
+    #region Results
     /// <summary>
     /// Model for trends results
     /// </summary>
@@ -228,7 +241,7 @@ namespace Twitter_trends.Services
         /// </summary>
         /// <value>The as_of.</value>
         [DataMember]
-        public DateTime as_of { get; set; }
+        public string as_of { get; set; }
 
         /// <summary>
         /// Gets or sets the trends.
@@ -237,4 +250,5 @@ namespace Twitter_trends.Services
         [DataMember]
         public Trend[] trends { get; set; }
     }
+    #endregion
 }

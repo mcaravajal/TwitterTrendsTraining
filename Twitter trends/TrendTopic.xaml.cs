@@ -37,24 +37,6 @@ namespace Twitter_trends
             set { SetValue(TrendsProperty, value); }
         }
         #endregion
-        #region IsTrendingLoading
-        /// <summary>
-        /// IsTrendsLoading Dependency Property
-        /// </summary>
-        public static readonly DependencyProperty IsLoadingProperty =
-            DependencyProperty.Register("IsTrendsLoading", typeof(bool), typeof(TrendTopic),
-                new PropertyMetadata((bool)false));
-
-        /// <summary>
-        /// Gets or sets the IsTrendsLoading property. This dependency property 
-        /// indicates whether we are currently loading trends.
-        /// </summary>
-        public bool IsTrendsLoading
-        {
-            get { return (bool)GetValue(IsLoadingProperty); }
-            set { SetValue(IsLoadingProperty, value); }
-        }
-        #endregion
         string TrendingTopic = "TrendingTopic";
         public TrendTopic()
         {
@@ -66,8 +48,9 @@ namespace Twitter_trends
             trends = this.LoadState<ObservableCollection<Trend>>(TrendingTopic);
             if (trends == null)
             {
+
                 trends = new ObservableCollection<Trend>();
-                IsTrendsLoading = true;
+                IsLoading.Visibility = Visibility.Visible;
                 ApiTrendService.GetTrends(
                     //When it finish the loading
                     delegate(IEnumerable<Trend> results)
@@ -76,12 +59,11 @@ namespace Twitter_trends
                         {
                             trends.Add(x);
                         }
-                        IsTrendsLoading = false;
                     },
                     //If something is wrong
                     delegate(Exception ex)
                     {
-                        IsTrendsLoading = false;
+                        IsLoading.Visibility = Visibility.Collapsed;
                     },
                     //Check if the results are Ok
                     delegate()
@@ -105,6 +87,8 @@ namespace Twitter_trends
                                 OnNavigatedTo(null);
                             }
                         }
+                        else
+                            IsLoading.Visibility = Visibility.Collapsed;
                     });
             }
         }

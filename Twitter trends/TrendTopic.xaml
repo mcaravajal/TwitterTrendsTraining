@@ -28,14 +28,18 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
+        
         <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28" Orientation="Vertical">
             <TextBlock x:Name="PageTitle" Text="Top Trends" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" />
+            <StackPanel Orientation="Vertical" x:Name="IsLoading" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="22" />
+                <ProgressBar IsIndeterminate="True" Foreground="DeepSkyBlue" FontSize="32"/>
+            </StackPanel>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
-        <ListBox ItemTemplate="{StaticResource ListTemplate}"  ItemsSource="{Binding trends}"  x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0" ></ListBox>
+        <ListBox ItemTemplate="{StaticResource ListTemplate}"  ItemsSource="{Binding trends}"  x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0" />
     </Grid>
  
     <!--Sample code showing usage of ApplicationBar-->
