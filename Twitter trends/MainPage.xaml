@@ -29,8 +29,9 @@
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
             <StackPanel Orientation="Vertical">
-                <Button Content="Top 10 Trends" Click="Button_Click" Height="Auto" />
-                <Button Content="Trend Tools" Click="Button_Click_1" Height="Auto"/>
+                <Button Content="Top 10 Trends" Click="Button_Click"/>
+                <Button Content="Trends By Country" Click="Button_Click_2"/>
+                <Button Content="Search Trends" Click="Button_Click_1"/>
             </StackPanel>
         </Grid>
     </Grid>

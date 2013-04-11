@@ -18,6 +18,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
 
 namespace Twitter_trends.Services
 {
@@ -85,6 +86,9 @@ namespace Twitter_trends.Services
         /// <value>The name.</value>
         [DataMember]
         public string name { get; set; }
+        
+        [DataMember]
+        public string Header { get; set; }
         /// <summary>
         /// Gets or sets the newly_trending.
         /// </summary>
@@ -146,8 +150,10 @@ namespace Twitter_trends.Services
         /// <value><c>true</c> if locked; otherwise, <c>false</c>.</value>
         [DataMember]
         public bool locked { get; set; }
-
-        /// <summary>
+        
+        [DataMember]
+        public string TittleTrend { get; set; }
+        /*/// <summary>
         /// Gets the indexed name of the trend.
         /// </summary>
         /// <value>The indexed name of the trend.</value>
@@ -157,7 +163,7 @@ namespace Twitter_trends.Services
             {
                 return string.Format("#{0} {1}", trend_index, name);
             }
-        }
+        }*/
         
         /// <summary>
         /// Gets or sets the twits.
@@ -182,7 +188,7 @@ namespace Twitter_trends.Services
         /// <returns>
         /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        /*public override bool Equals(object obj)
         {
             Trend other = obj as Trend;
 
@@ -201,7 +207,7 @@ namespace Twitter_trends.Services
         public override int GetHashCode()
         {
             return name.GetHashCode();
-        }
+        }*/
 
         #region Property Changed
 
@@ -219,6 +225,17 @@ namespace Twitter_trends.Services
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
+        public bool exist(List<Trend> obj)
+        {
+            foreach (Trend x in obj)
+            {
+                    if (x.slug==this.slug)
+                    {
+                        return true;
+                    }
+            }
+            return false;
+        }
         #endregion
     }
     #endregion

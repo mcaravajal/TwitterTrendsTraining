@@ -48,9 +48,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Hammock.WindowsPhone.Mango">
+      <HintPath>..\packages\TweetSharp.2.3.0\lib\sl4-wp71\Hammock.WindowsPhone.Mango.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib.WindowsPhone">
+      <HintPath>..\packages\TweetSharp.2.3.0\lib\sl4-wp71\ICSharpCode.SharpZipLib.WindowsPhone.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Controls, Version=7.0.0.0, Culture=neutral, PublicKeyToken=24eec0d8c86cda1e, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Phone.Interop" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\TweetSharp.2.3.0\lib\sl4-wp71\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Servicemodel.Web" />
     <Reference Include="System.Windows" />
@@ -60,6 +69,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="mscorlib.extensions" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="TweetSharp.WindowsPhone.Mango">
+      <HintPath>..\packages\TweetSharp.2.3.0\lib\sl4-wp71\TweetSharp.WindowsPhone.Mango.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Services\ApiTrendService.cs" />
@@ -73,15 +85,14 @@
     <Compile Include="Services\Locations.cs" />
     <Compile Include="Services\StateManager.cs" />
     <Compile Include="Services\Trend.cs" />
-    <Compile Include="Services\TrendTest.cs" />
     <Compile Include="Services\Twit.cs" />
-    <Compile Include="TrendTools.xaml.cs">
+    <Compile Include="Views\TrendTools.xaml.cs">
       <DependentUpon>TrendTools.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TrendTopic.xaml.cs">
+    <Compile Include="Views\TrendTopic.xaml.cs">
       <DependentUpon>TrendTopic.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TwitPage.xaml.cs">
+    <Compile Include="Views\TwitPage.xaml.cs">
       <DependentUpon>TwitPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -94,20 +105,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TrendTools.xaml">
+    <Page Include="Views\TrendTools.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TrendTopic.xaml">
+    <Page Include="Views\TrendTopic.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TwitPage.xaml">
+    <Page Include="Views\TwitPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Properties\AppManifest.xml" />
     <None Include="Properties\WMAppManifest.xml" />
   </ItemGroup>

@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
+using Twitter_trends.Services;
 
 namespace Twitter_trends
 {
@@ -23,12 +24,20 @@ namespace Twitter_trends
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new Uri("/TrendTopic.xaml", UriKind.Relative));
+            this.NavigationService.Navigate(new Uri("/Views/TrendTopic.xaml", UriKind.Relative));
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            this.NavigationService.Navigate(new Uri("/TrendTools.xaml", UriKind.Relative));
+            this.NavigationService.Navigate(new Uri("/Views/TrendTools.xaml", UriKind.Relative));
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            Locations Loc = new Locations();
+            Loc.place_type_code = 12;
+            TwitPage.SelectedLocation = Loc;
+            this.NavigationService.Navigate(new Uri("/Views/TwitPage.xaml", UriKind.Relative));
         }
     }
 }
