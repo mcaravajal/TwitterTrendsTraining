@@ -31,7 +31,7 @@ namespace Twitter_trends
         
         public ObservableCollection<Locations> CountryList
         {
-            get {return (ObservableCollection<Locations>)GetValue(CountryProperty);}
+            get { return (ObservableCollection<Locations>)GetValue(CountryProperty);}
             set { SetValue(CountryProperty, value); }
         }
 
@@ -92,36 +92,38 @@ namespace Twitter_trends
                     },
                     delegate()
                     {
-                        if (CountryList == null)
-                        {
-                            if (Timeout >= 5)
+                        Dispatcher.BeginInvoke(() =>
                             {
-                                Timeout = 0;
-                                if (NetworkInterface.GetIsNetworkAvailable())
+                                if (CountryList == null)
                                 {
-                                    MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                    if (Timeout >= 5)
+                                    {
+                                        Timeout = 0;
+                                        if (NetworkInterface.GetIsNetworkAvailable())
+                                        {
+                                            MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
+                                            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                        }
+                                        else
+                                        {
+                                            MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
+                                            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Timeout++;
+                                        //Call this function again until we get the results or the timeout reach the limit
+                                        OnNavigatedTo(null);
+                                    }
                                 }
                                 else
                                 {
-                                    MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                    Timeout = 0;
+                                    IsLoading.Visibility = Visibility.Collapsed;
                                 }
-                            }
-                            else
-                            {
-                                Timeout++;
-                                //Call this function again until we get the results or the timeout reach the limit
-                                OnNavigatedTo(null);
-                            }
-                        }
-                        else
-                        {
-                            Timeout = 0;
-                            IsLoading.Visibility= Visibility.Collapsed;
-                        }
+                            });
                     });
-
             }
         }
         private void LocationName_Tap(object sender, GestureEventArgs e)
