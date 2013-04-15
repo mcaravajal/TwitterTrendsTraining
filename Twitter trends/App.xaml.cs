@@ -103,6 +103,18 @@ namespace Twitter_trends
                     System.Diagnostics.Debugger.Break();
             }
         }
+        public static bool CheckError(int Timeout)
+        {
+            if (Timeout >= 5)
+            {
+                if (NetworkInterface.GetIsNetworkAvailable())
+                    MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
+                else
+                    MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
+                return true;
+            }
+            return false;
+        }
         #region Phone application initialization
 
         // Avoid double-initialization

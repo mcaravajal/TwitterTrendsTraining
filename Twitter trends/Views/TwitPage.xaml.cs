@@ -84,8 +84,9 @@ namespace Twitter_trends
         #region TimeOut
         int TimeOut=0;
 #endregion
-        #region FlagPivot
+        #region Flags
         public bool FlagPivot;
+        public static int Action; //1=View only 1 location 2= View List of location 3=View list of trends
         #endregion 
         #region LoadedTwits
         public List<Trend> LoadedTrends= new List<Trend>();
@@ -98,108 +99,149 @@ namespace Twitter_trends
         {
             if (SelectedLocation != null)
             {
-                var status = this.LoadState<ObservableCollection<Trend>>("TwitPage");
-                if (status == null)
+                if (Action == 1)
                 {
-                    FlagPivot = false;
-                    IsLoading.Visibility = Visibility.Visible;
-                    ApiTrendService.GetTrendsFromLocation(SelectedLocation.place_type_code,
-                        (results)=>
+                    Trend TrendSelected = null;
+                    Locations taped = SelectedLocation;
+                    ApiTrendService.GetSingleTrendsFromLocation(taped,
+                        (result) =>
                         {
-                            Trends = new ObservableCollection<Trend>();
-                            foreach (Trend x in results)
+                            Dispatcher.BeginInvoke(() =>
                             {
-                                if (x.slug == null)
-                                {
-                                    x.TittleTrend = x.trend_index.ToString();
-                                    x.slug = HttpUtility.UrlEncode(x.name);
-                                    x.name = null;
-                                    x.Header=(x.trend_index.ToString());
-                                }
-                                else
-                                {
-                                    x.TittleTrend = HttpUtility.UrlDecode(x.slug);
-                                    x.Header=(x.place_name);
-                                }
-                                Trends.Add(x);
-                            }
-                        },
-                        (ex)=>
-                        {
+                                TrendSelected = result;
+                                TrendSelected.place_name = taped.name;
+                                TrendSelected.slug = null;
+                                TrendSelected.Header = TrendSelected.place_name;
+                                TrendSelected.TittleTrend = TrendSelected.name;
+                                Trends = new ObservableCollection<Trend>();
+                                Trends.Add(TrendSelected);
+                                CurrentTrend = TrendSelected;
+                            });
 
-                        },
-                        ()=>
+                        }, () =>
                         {
-                            if (Trends == null)
+                            Dispatcher.BeginInvoke(() =>
                             {
-                                if (TimeOut >= 5)
+                                if (TrendSelected == null)
                                 {
-                                    if (NetworkInterface.GetIsNetworkAvailable())
+                                    if (App.CheckError(TimeOut))
                                     {
-                                        MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
+                                        TimeOut = 0;
+                                        this.GoToPage(ApplicationPages.Back);
                                     }
                                     else
-                                    {
-                                        MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                    }
-                                    NavigationService.GoBack();
+                                        TimeOut++;
                                 }
-                                TimeOut++;
-                                OnNavigatedFrom(null);
-                            }
-                            else
-                            {
-                                IsLoading.Visibility = Visibility.Collapsed;
-                                if (SelectedLocation.name != null)
-                                {
-                                    foreach (Trend x in Trends)
-                                    {
-                                        if (x.place_name == SelectedLocation.name)
-                                        {
-                                            Dispatcher.BeginInvoke(() =>
-                                                {
-                                                    FlagPivot = true;
-                                                    PivotControl.SelectedItem = x;
-                                                });
-                                            break;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    Dispatcher.BeginInvoke(() =>
-                                        {
-                                            FlagPivot = true;
-                                            PivotControl.SelectedItem = (Trends[0]);
-                                        });
-                                }
-                            }
+                            });
                         });
+                }
+                else
+                {
+                    var status = this.LoadState<ObservableCollection<Trend>>("TwitPage");
+                    if (status == null)
+                    {
+                        FlagPivot = false;
+                        IsLoading.Visibility = Visibility.Visible;
+                        ApiTrendService.GetTrendsFromLocation(SelectedLocation.place_type_code,
+                            (results) =>
+                            {
+                                Dispatcher.BeginInvoke(() =>
+                                {
+                                    Trends = new ObservableCollection<Trend>();
+                                    foreach (Trend x in results)
+                                    {
+                                        if (x.slug == null)
+                                        {
+                                            x.TittleTrend = x.trend_index.ToString();
+                                            x.slug = HttpUtility.UrlEncode(x.name);
+                                            x.name = null;
+                                            x.Header = (x.trend_index.ToString());
+                                        }
+                                        else
+                                        {
+                                            x.TittleTrend = HttpUtility.UrlDecode(x.slug);
+                                            x.Header = (x.place_name);
+                                        }
+                                        Trends.Add(x);
+                                    }
+                                });
+                            },
+                            () =>
+                            {
+                                Dispatcher.BeginInvoke(() =>
+                                    {
+                                        if (Trends == null)
+                                        {
+                                            if (App.CheckError(TimeOut))
+                                            {
+                                                TimeOut = 0;
+                                                this.GoToPage(ApplicationPages.Back);
+                                            }
+                                            else
+                                            {
+                                                TimeOut++;
+                                                OnNavigatedFrom(null);
+                                            }
+                                        }
+
+                                        else
+                                        {
+                                            IsLoading.Visibility = Visibility.Collapsed;
+                                            if (SelectedLocation.name != null)
+                                            {
+                                                foreach (Trend x in Trends)
+                                                {
+                                                    if (x.place_name == SelectedLocation.name)
+                                                    {
+                                                        FlagPivot = true;
+                                                        PivotControl.SelectedItem = x;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                FlagPivot = true;
+                                                PivotControl.SelectedItem = (Trends[0]);
+                                            }
+                                        }
+                                    });
+                            });
+                    }
                 }
             }
             else
             {
-                Trends = new ObservableCollection<Trend>();
-                Trends = GlobalTrends;
-                if (GlobalSelectedTrend.slug==null)
+                if (Action == 3 || Action==4)
                 {
-                    if (GlobalSelectedTrend.trend_index == 0)
+                    Dispatcher.BeginInvoke(() =>
                     {
-                        GlobalSelectedTrend.Header = GlobalSelectedTrend.place_name;
-                        GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.name;
-                        GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
-                        GlobalSelectedTrend.name = null;
-                    }
-                    else
-                    {
-                        GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.trend_index.ToString();
-                        GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
-                        GlobalSelectedTrend.name = null;
-                    }
+                        Trends = new ObservableCollection<Trend>();
+                        if (Action == 3)
+                            Trends = GlobalTrends;
+                        else
+                            Trends.Add(GlobalSelectedTrend);
+                        if (GlobalSelectedTrend.slug == null)
+                        {
+                            if (GlobalSelectedTrend.trend_index == 0)
+                            {
+                                GlobalSelectedTrend.Header = GlobalSelectedTrend.place_name;
+                                GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.name;
+                                GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
+                                GlobalSelectedTrend.name = null;
+                            }
+                            else
+                            {
+                                GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.trend_index.ToString();
+                                GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
+                                GlobalSelectedTrend.name = null;
+                            }
+                        }
+                        CurrentTrend = GlobalSelectedTrend;
+                        FlagPivot = true;
+                        IsLoading.Visibility = Visibility.Collapsed;
+                    });
                 }
-                CurrentTrend = GlobalSelectedTrend;
-                FlagPivot = true;
-                IsLoading.Visibility = Visibility.Collapsed;
             }
         }
         private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -226,64 +268,59 @@ namespace Twitter_trends
                 {
                     FlagPivot = false;
                     IsLoading.Visibility = Visibility.Visible;
-                    string query = ChangedTo.slug == null ? HttpUtility.UrlEncode(ChangedTo.slug) : ChangedTo.slug;
-                    ApiTrendService.Search(query,
+                    string query = ChangedTo.slug == null ? HttpUtility.UrlEncode(ChangedTo.name) : ChangedTo.slug;
+                    
+                    ApiTrendService.SearchTrend(query,
                         ( results)=>
                         {
-                            ChangedTo.Twits = new ObservableCollection<Twit>();
-                            foreach (Twit x in results)
-                            {
-                                ChangedTo.Twits.Add(x);
-                            }
-                            IsLoading.Visibility = Visibility.Collapsed;
-                            if(!ChangedTo.exist(LoadedTrends))
-                            {
-                                LoadedTrends.Add(ChangedTo);
-                            }
-                        },
-                        (ex)=>
-                        {
-
+                            Dispatcher.BeginInvoke(() =>
+                                {
+                                    ChangedTo.Twits = new ObservableCollection<Twit>();
+                                    foreach (Twit x in results)
+                                    {
+                                        ChangedTo.Twits.Add(x);
+                                    }
+                                    IsLoading.Visibility = Visibility.Collapsed;
+                                    if (!ChangedTo.exist(LoadedTrends))
+                                    {
+                                        LoadedTrends.Add(ChangedTo);
+                                    }
+                                });
                         },
                         ()=>
                         {
-                            if (Trends != null)
+                            Dispatcher.BeginInvoke(() =>
                             {
-                                if (ChangedTo == null)
+                                if (Trends != null)
                                 {
-                                    OnNavigatedTo(null);
-                                }
-                                else if (ChangedTo.Twits == null)
-                                {
-                                    if (TimeOut >= 5)
+                                    if (ChangedTo == null)
                                     {
-                                        TimeOut = 0;
-                                        if (NetworkInterface.GetIsNetworkAvailable())
+                                        OnNavigatedTo(null);
+                                    }
+                                    else if (ChangedTo.Twits == null)
+                                    {
+                                        if (App.CheckError(TimeOut))
                                         {
-                                            MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                            NavigationService.GoBack();
+                                            TimeOut = 0;
+                                            this.GoToPage(ApplicationPages.Back);
                                         }
                                         else
                                         {
-                                            MessageBox.Show("Unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                            NavigationService.GoBack();
+                                            TimeOut++;
+                                            Pivot_SelectionChanged(sender, e);
                                         }
                                     }
                                     else
                                     {
-                                        TimeOut++;
-                                        Pivot_SelectionChanged(sender, e);
+                                        FlagPivot = true;
                                     }
                                 }
+
                                 else
                                 {
-                                    FlagPivot = true;
+                                    OnNavigatedTo(null);
                                 }
-                            }
-                            else
-                            {
-                                OnNavigatedTo(null);
-                            }
+                            });
                         });
                 }
             }

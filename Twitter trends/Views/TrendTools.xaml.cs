@@ -25,17 +25,17 @@ namespace Twitter_trends
             FilterList = new ObservableCollection<Locations>();
         }
         #region Country
-        
+
         public static readonly DependencyProperty CountryProperty =
             DependencyProperty.Register("CountryList", typeof(ObservableCollection<Locations>), typeof(TrendTools), new PropertyMetadata((ObservableCollection<Trend>)null));
-        
+
         public ObservableCollection<Locations> CountryList
         {
-            get { return (ObservableCollection<Locations>)GetValue(CountryProperty);}
+            get { return (ObservableCollection<Locations>)GetValue(CountryProperty); }
             set { SetValue(CountryProperty, value); }
         }
 
-#endregion
+        #endregion
         #region Filter
 
         public static readonly DependencyProperty FilterProperty =
@@ -50,11 +50,11 @@ namespace Twitter_trends
         #endregion
         #region ResultsList
         private static readonly DependencyProperty ResultProperty =
-            DependencyProperty.Register("ResultList", typeof(ObservableCollection<Twit>), typeof(TrendTools), new PropertyMetadata((ObservableCollection<Twit>)null));
-        public ObservableCollection<Twit> ResultList
+            DependencyProperty.Register("ResultList", typeof(ObservableCollection<Trend>), typeof(TrendTools), new PropertyMetadata((ObservableCollection<Trend>)null));
+        public ObservableCollection<Trend> ResultList
         {
-            get { return (ObservableCollection<Twit>)GetValue(ResultProperty); }
-            set { SetValue(ResultProperty,value); }
+            get { return (ObservableCollection<Trend>)GetValue(ResultProperty); }
+            set { SetValue(ResultProperty, value); }
         }
         #endregion
         #region Timeouts
@@ -67,12 +67,12 @@ namespace Twitter_trends
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
-            var state= this.LoadState<ObservableCollection<Locations>>("TrendTools");
+            var state = this.LoadState<ObservableCollection<Locations>>("TrendTools");
             if (state == null)
             {
                 IsLoading.Visibility = Visibility.Visible;
                 ApiTrendService.GetLocations(
-                    delegate(IEnumerable<Locations> results)
+                    (results) =>
                     {
                         Dispatcher.BeginInvoke(() =>
                             {
@@ -83,32 +83,18 @@ namespace Twitter_trends
                                         CountryList.Add(aux);
                                 }
                             });
-                        
+
                     },
-                    delegate(Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "ERROR", MessageBoxButton.OK);
-                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
-                    },
-                    delegate()
+                    () =>
                     {
                         Dispatcher.BeginInvoke(() =>
                             {
                                 if (CountryList == null)
                                 {
-                                    if (Timeout >= 5)
+                                    if (App.CheckError(Timeout))
                                     {
                                         Timeout = 0;
-                                        if (NetworkInterface.GetIsNetworkAvailable())
-                                        {
-                                            MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
-                                        }
-                                        else
-                                        {
-                                            MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
-                                        }
+                                        this.GoToPage(ApplicationPages.Back);
                                     }
                                     else
                                     {
@@ -128,50 +114,14 @@ namespace Twitter_trends
         }
         private void LocationName_Tap(object sender, GestureEventArgs e)
         {
-            Trend TrendSelected = null;
-            Locations taped = ((TextBlock)sender).DataContext as Locations;
-            ApiTrendService.GetSingleTrendsFromLocation(taped,
-                (result) =>
-                {
-                    TrendSelected = result;
-                    TrendSelected.place_name = taped.name;
-                    TrendSelected.slug = null;
-                    ObservableCollection<Trend> Trends = new ObservableCollection<Trend>();
-                    Trends.Add(TrendSelected);
-                    TwitPage.GlobalTrends = Trends;
-                    TwitPage.GlobalSelectedTrend = TrendSelected;
-                    Dispatcher.BeginInvoke(() => { this.NavigationService.Navigate(new Uri("/Views/TwitPage.xaml", UriKind.Relative)); });
-                }, () =>
-                {
-                    if (TrendSelected == null)
-                    {
-                        if (Timeout >= 5)
-                        {
-                            Timeout = 0;
-                            if (!NetworkInterface.GetIsNetworkAvailable())
-                            {
-                                MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
-                            }
-                            else
-                            {
-                                MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                NavigationService.GoBack();
-                            }
-                        }
-                        else
-                        {
-                            Timeout++;
-                            LocationName_Tap(sender, e);
-                        }
-                    }
-                }
-            );
+            TwitPage.SelectedLocation = ((TextBlock)sender).DataContext as Locations;
+            TwitPage.Action = 1;
+            this.GoToPage(ApplicationPages.Twitter);
         }
-        
+
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (CountryList != null && Search.Text.Length>=2)
+            if (CountryList != null && Search.Text.Length >= 2)
             {
                 IsLoading.Visibility = Visibility.Visible;
                 FilterListAction(Search.Text);
@@ -186,14 +136,14 @@ namespace Twitter_trends
 
         private void Search_Tap(object sender, GestureEventArgs e)
         {
-            if (Search.Text=="Insert location")
+            if (Search.Text == "Insert location")
             {
                 Search.Text = string.Empty;
             }
         }
         private void FilterListAction(string query)
         {
-            if (CountryList !=null)
+            if (CountryList != null)
             {
                 FilterList.Clear();
                 foreach (Locations x in CountryList)
@@ -208,76 +158,85 @@ namespace Twitter_trends
 
         private void Result_Tap(object sender, GestureEventArgs e)
         {
-
+            Trend selected= ((TextBlock)sender).DataContext as Trend;
+            selected.Header = selected.name;
+            selected.place_name = "Earth";
+            TwitPage.GlobalSelectedTrend = selected;
+            TwitPage.Action = 4;
+            this.GoToPage(ApplicationPages.Twitter);
         }
 
         private void SearchTrends_Tap(object sender, GestureEventArgs e)
         {
             SearchTrends.Focus();
             if (SearchTrends.Text == "Search Trend")
-	        {
+            {
                 SearchTrends.Text = string.Empty;
-	        } 
+            }
         }
 
         private void SearchTrends_TextInput(object sender, TextCompositionEventArgs e)
         {
-            if (SearchTrends.Text != string.Empty)
-            {
-                string query = HttpUtility.UrlEncode("#" + SearchTrends.Text);
-                IsLoadingSearch.Visibility = Visibility.Visible;
-                if (ResultList == null)
-                    ResultList = new ObservableCollection<Twit>();
-                else
-                    ResultList.Clear();
-                ApiTrendService.Search(query, delegate(IEnumerable<Twit> results)
+            
+                if (SearchTrends.Text != string.Empty)
                 {
-                    foreach (Twit x in results)
+                    SearchResults.Focus();
+                    string query = HttpUtility.UrlEncode(SearchTrends.Text);
+                    IsLoadingSearch.Visibility = Visibility.Visible;
+                    Dispatcher.BeginInvoke(() =>
                     {
-                        ResultList.Add(x);
-                    }
-                },
-                delegate(Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "ERROR", MessageBoxButton.OK);
-                },
-                delegate()
-                {
                     if (ResultList == null)
+                        ResultList = new ObservableCollection<Trend>();
+                    else
+                        ResultList.Clear();
+                    });
+                    ApiTrendService.SimpleSearch(query,
+                    (results) =>
                     {
-                        if (TimeoutSearch >= 5)
+                        Dispatcher.BeginInvoke(() =>
                         {
-                            if (NetworkInterface.GetIsNetworkAvailable())
+                            foreach (string x in results)
                             {
-                                MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                Trend aux = new Trend();
+                                aux.name=x;
+                                ResultList.Add(aux);
+                            }
+                        });
+                    },
+                    () =>
+                    {
+                        Dispatcher.BeginInvoke(() =>
+                        {
+                            if (ResultList == null)
+                            {
+                                if (App.CheckError(TimeoutSearch))
+                                {
+                                    this.GoToPage(ApplicationPages.Back);
+                                }
+                                else
+                                {
+                                    TimeoutSearch++;
+                                    SearchTrends_TextInput(null, null);
+                                }
                             }
                             else
                             {
-                                MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                TimeoutSearch = 0;
+                                IsLoadingSearch.Visibility = Visibility.Collapsed;
                             }
-                        }
-                        TimeoutSearch++;
-                        SearchTrends_TextInput(null, null);
-                    }
-                    else
-                    {
-                        TimeoutSearch = 0;
-                        IsLoadingSearch.Visibility = Visibility.Collapsed;
-                    }
-                });
-            }
-            else
-            {
-                StatusSearch.Text = "Insert Trend";
-                StatusSearch.Visibility = Visibility.Visible;
-            }
+                        });
+                    });
+                }
+                else
+                {
+                    StatusSearch.Text = "Insert Trend";
+                    StatusSearch.Visibility = Visibility.Visible;
+                }
         }
 
         private void Search_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (Search.Text==string.Empty)
+            if (Search.Text == string.Empty)
             {
                 Search.Text = "Insert Locations";
             }
@@ -285,7 +244,7 @@ namespace Twitter_trends
 
         private void SearchTrends_LostFocus(object sender, RoutedEventArgs e)
         {
-            if (SearchTrends.Text==string.Empty)
+            if (SearchTrends.Text == string.Empty)
             {
                 StatusSearch.Text = "Insert Trend";
                 StatusSearch.Visibility = Visibility.Visible;

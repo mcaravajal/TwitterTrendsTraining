@@ -18,7 +18,9 @@ namespace Twitter_trends
 {
     public partial class TrendTopic : PhoneApplicationPage
     {
+        #region Timeout
         int Timeout = 0;
+        #endregion
         #region Trends
         /// <summary>
         /// Trends Dependency Property
@@ -53,8 +55,9 @@ namespace Twitter_trends
                 IsLoading.Visibility = Visibility.Visible;
                 ApiTrendService.GetTrends(
                     //When it finish the loading
-                    delegate(IEnumerable<Trend> results)
+                    (results)=>
                     {
+                        Dispatcher.BeginInvoke(() =>{ 
                         foreach (Trend x in results)
                         {
                             if (x.slug==null)
@@ -63,8 +66,9 @@ namespace Twitter_trends
                                 x.TittleTrend = x.name;
                                 x.Header = x.trend_index.ToString();
                             }
-                            trends.Add(x);
+                            trends.Add(x); 
                         }
+                        });
                     },
                     //If something is wrong
                     delegate(Exception ex)
@@ -74,31 +78,25 @@ namespace Twitter_trends
                     //Check if the results are Ok
                     delegate()
                     {
-                        if (trends == null)
+                        Dispatcher.BeginInvoke(() =>
                         {
-                            if (Timeout >= 0)
+                            if (trends == null)
                             {
-                                Timeout = 0;
-                                if (NetworkInterface.GetIsNetworkAvailable())
+                                if (App.CheckError(Timeout))
                                 {
-                                    MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                    Timeout = 0;
+                                    this.GoToPage(ApplicationPages.Back);
                                 }
                                 else
                                 {
-                                    MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                    NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                    Timeout++;
+                                    //Call this function again until we get the results or the timeout reach the limit
+                                    OnNavigatedTo(null);
                                 }
                             }
                             else
-                            {
-                                Timeout++;
-                                //Call this function again until we get the results or the timeout reach the limit
-                                OnNavigatedTo(null);
-                            }
-                        }
-                        else
-                            IsLoading.Visibility = Visibility.Collapsed;
+                                IsLoading.Visibility = Visibility.Collapsed;
+                        });
                     });
             }
         }
@@ -106,18 +104,14 @@ namespace Twitter_trends
         {
             this.SaveState(TrendingTopic,trends);
         }
-        private void PivotControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            
-        }
-
         private void StackPanel_Tap(object sender, GestureEventArgs e)
         {
             TextBlock block = sender as TextBlock;
             Trend selected = block.DataContext as Trend;
             TwitPage.GlobalTrends = trends;
             TwitPage.GlobalSelectedTrend = selected;
-            NavigationService.Navigate(new Uri("/Views/TwitPage.xaml",UriKind.Relative));
+            TwitPage.Action = 3;
+            this.GoToPage(ApplicationPages.Twitter);
         }
     }
 }

@@ -20,7 +20,7 @@
             <TextBlock x:Name="LocationName" Text="{Binding name}" Tap="LocationName_Tap" HorizontalAlignment="Stretch" FontSize="32"/>
         </DataTemplate>
         <DataTemplate x:Key="SearchListTemplate">
-            <TextBlock x:Name="Result" Text="{Binding text}" Tap="Result_Tap" HorizontalAlignment="Stretch" FontSize="32" TextWrapping="Wrap"/>
+            <TextBlock x:Name="Result" Text="{Binding name}" Tap="Result_Tap" HorizontalAlignment="Stretch" FontSize="32" TextWrapping="Wrap"/>
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
     <!--LayoutRoot contains the root grid where all other page content is placed-->
