@@ -12,6 +12,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using Microsoft.Phone.Net.NetworkInformation;
 
 namespace Twitter_trends
 {
@@ -102,7 +103,6 @@ namespace Twitter_trends
                     System.Diagnostics.Debugger.Break();
             }
         }
-
         #region Phone application initialization
 
         // Avoid double-initialization

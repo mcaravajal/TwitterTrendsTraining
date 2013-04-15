@@ -13,6 +13,7 @@ using Microsoft.Phone.Controls;
 using Twitter_trends.Services;
 using System.Collections.ObjectModel;
 using Microsoft.Phone.Net.NetworkInformation;
+using System.IO;
 
 namespace Twitter_trends
 {
@@ -73,12 +74,16 @@ namespace Twitter_trends
                 ApiTrendService.GetLocations(
                     delegate(IEnumerable<Locations> results)
                     {
-                        CountryList = new ObservableCollection<Locations>();
-                        foreach (Locations aux in results)
-                        {
-                            if (aux.place_type_code==12)
-                                CountryList.Add(aux);
-                        }
+                        Dispatcher.BeginInvoke(() =>
+                            {
+                                CountryList = new ObservableCollection<Locations>();
+                                foreach (Locations aux in results)
+                                {
+                                    if (aux.place_type_code == 12)
+                                        CountryList.Add(aux);
+                                }
+                            });
+                        
                     },
                     delegate(Exception ex)
                     {
@@ -122,19 +127,26 @@ namespace Twitter_trends
         private void LocationName_Tap(object sender, GestureEventArgs e)
         {
             Trend TrendSelected = null;
-            Locations taped= ((TextBlock)sender).DataContext as Locations;
+            Locations taped = ((TextBlock)sender).DataContext as Locations;
             ApiTrendService.GetSingleTrendsFromLocation(taped,
-            (result) =>
-            {
-                TrendSelected = result;
-            }, () =>
+                (result) =>
                 {
-                    if (TrendSelected==null)
+                    TrendSelected = result;
+                    TrendSelected.place_name = taped.name;
+                    TrendSelected.slug = null;
+                    ObservableCollection<Trend> Trends = new ObservableCollection<Trend>();
+                    Trends.Add(TrendSelected);
+                    TwitPage.GlobalTrends = Trends;
+                    TwitPage.GlobalSelectedTrend = TrendSelected;
+                    Dispatcher.BeginInvoke(() => { this.NavigationService.Navigate(new Uri("/Views/TwitPage.xaml", UriKind.Relative)); });
+                }, () =>
+                {
+                    if (TrendSelected == null)
                     {
                         if (Timeout >= 5)
                         {
                             Timeout = 0;
-                            if (NetworkInterface.GetIsNetworkAvailable())
+                            if (!NetworkInterface.GetIsNetworkAvailable())
                             {
                                 MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
                                 NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
@@ -142,7 +154,7 @@ namespace Twitter_trends
                             else
                             {
                                 MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
+                                NavigationService.GoBack();
                             }
                         }
                         else
@@ -153,14 +165,8 @@ namespace Twitter_trends
                     }
                 }
             );
-            TrendSelected.place_name = taped.name;
-            ObservableCollection<Trend> Trends = new ObservableCollection<Trend>();
-            Trends.Add(TrendSelected);
-            TwitPage.GlobalTrends= Trends;
-            TwitPage.GlobalSelectedTrend = TrendSelected;
-            this.NavigationService.Navigate(new Uri("/Views/TwitPage.xaml", UriKind.Relative));
         }
-
+        
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (CountryList != null && Search.Text.Length>=2)

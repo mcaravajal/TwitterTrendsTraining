@@ -134,17 +134,15 @@ namespace Twitter_trends
                             {
                                 if (TimeOut >= 5)
                                 {
-                                    TimeOut = 0;
                                     if (NetworkInterface.GetIsNetworkAvailable())
                                     {
                                         MessageBox.Show("No network connection available please connect and try again", "ERROR", MessageBoxButton.OK);
-                                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
                                     }
                                     else
                                     {
                                         MessageBox.Show("An unexpected error occurred", "ERROR", MessageBoxButton.OK);
-                                        NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
                                     }
+                                    NavigationService.GoBack();
                                 }
                                 TimeOut++;
                                 OnNavigatedFrom(null);
@@ -188,6 +186,7 @@ namespace Twitter_trends
                     if (GlobalSelectedTrend.trend_index == 0)
                     {
                         GlobalSelectedTrend.Header = GlobalSelectedTrend.place_name;
+                        GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.name;
                         GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
                         GlobalSelectedTrend.name = null;
                     }
