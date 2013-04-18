@@ -13,6 +13,8 @@ using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Twitter_trends.Services;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.IO.IsolatedStorage;
 
 namespace Twitter_trends
 {

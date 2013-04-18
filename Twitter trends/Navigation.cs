@@ -18,7 +18,8 @@ namespace Twitter_trends
         Twitter,
         Tools,
         Main,
-        Back
+        Back,
+        Auth
     }
     public static class Navigation
     {
@@ -46,6 +47,10 @@ namespace Twitter_trends
                     else
                         phoneApplicationPage.GoToPage(ApplicationPages.Main);
                     break;
+                case ApplicationPages.Auth:
+                    phoneApplicationPage.NavigationService.Navigate(new Uri("/Views/Auth.xaml", UriKind.Relative));
+                    break;
+
             }
         }
 

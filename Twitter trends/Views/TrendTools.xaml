@@ -57,7 +57,10 @@
                     <TextBox x:Name="SearchTrends" Text="Search Trend" Grid.Row="0" TabIndex="0" Tap="SearchTrends_Tap" TextInput="SearchTrends_TextInput" LostFocus="SearchTrends_LostFocus" Padding="0" Margin="-9,0,0,0" />
                     <TextBlock x:Name="StatusSearch" Visibility="Visible" Grid.Row="0" FontSize="26" VerticalAlignment="Center" Text="Search any trend" Padding="1,0,0,0" />
                     </StackPanel>
-                    <StackPanel Orientation="Vertical" x:Name="IsLoadingSearch" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1">
+                    <StackPanel Orientation="Vertical" x:Name="EmptyList" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Visibility="Visible">
+                        <TextBlock Text="Insert something to search!!" HorizontalAlignment="Center" FontSize="22" />
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" x:Name="IsLoadingSearch" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Visibility="Collapsed">
                         <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="22" />
                         <ProgressBar IsIndeterminate="True" Foreground="DeepSkyBlue" FontSize="32"/>
                     </StackPanel>

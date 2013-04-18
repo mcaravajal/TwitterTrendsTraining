@@ -217,10 +217,7 @@ namespace Twitter_trends
                     Dispatcher.BeginInvoke(() =>
                     {
                         Trends = new ObservableCollection<Trend>();
-                        if (Action == 3)
-                            Trends = GlobalTrends;
-                        else
-                            Trends.Add(GlobalSelectedTrend);
+                        
                         if (GlobalSelectedTrend.slug == null)
                         {
                             if (GlobalSelectedTrend.trend_index == 0)
@@ -237,6 +234,14 @@ namespace Twitter_trends
                                 GlobalSelectedTrend.name = null;
                             }
                         }
+                        while (GlobalSelectedTrend.slug.StartsWith("+"))
+                        {
+                            GlobalSelectedTrend.slug = GlobalSelectedTrend.slug.Remove(0, 1);
+                        }
+                        if (Action == 3)
+                            Trends = GlobalTrends;
+                        else
+                            Trends.Add(GlobalSelectedTrend);
                         CurrentTrend = GlobalSelectedTrend;
                         FlagPivot = true;
                         IsLoading.Visibility = Visibility.Collapsed;
@@ -269,59 +274,58 @@ namespace Twitter_trends
                     FlagPivot = false;
                     IsLoading.Visibility = Visibility.Visible;
                     string query = ChangedTo.slug == null ? HttpUtility.UrlEncode(ChangedTo.name) : ChangedTo.slug;
-                    
-                    ApiTrendService.SearchTrend(query,
-                        ( results)=>
-                        {
-                            Dispatcher.BeginInvoke(() =>
-                                {
-                                    ChangedTo.Twits = new ObservableCollection<Twit>();
-                                    foreach (Twit x in results)
-                                    {
-                                        ChangedTo.Twits.Add(x);
-                                    }
-                                    IsLoading.Visibility = Visibility.Collapsed;
-                                    if (!ChangedTo.exist(LoadedTrends))
-                                    {
-                                        LoadedTrends.Add(ChangedTo);
-                                    }
-                                });
-                        },
-                        ()=>
-                        {
-                            Dispatcher.BeginInvoke(() =>
+                    ApiTrendService.Search(query,
+                            (results) =>
                             {
-                                if (Trends != null)
-                                {
-                                    if (ChangedTo == null)
+                                Dispatcher.BeginInvoke(() =>
                                     {
-                                        OnNavigatedTo(null);
-                                    }
-                                    else if (ChangedTo.Twits == null)
-                                    {
-                                        if (App.CheckError(TimeOut))
+                                        ChangedTo.Twits = new ObservableCollection<Twit>();
+                                        foreach (Twit x in results)
                                         {
-                                            TimeOut = 0;
-                                            this.GoToPage(ApplicationPages.Back);
+                                            ChangedTo.Twits.Add(x);
+                                        }
+                                        IsLoading.Visibility = Visibility.Collapsed;
+                                        if (!ChangedTo.exist(LoadedTrends))
+                                        {
+                                            LoadedTrends.Add(ChangedTo);
+                                        }
+                                    });
+                            },
+                            () =>
+                            {
+                                Dispatcher.BeginInvoke(() =>
+                                {
+                                    if (Trends != null)
+                                    {
+                                        if (ChangedTo == null)
+                                        {
+                                            OnNavigatedTo(null);
+                                        }
+                                        else if (ChangedTo.Twits == null)
+                                        {
+                                            if (App.CheckError(TimeOut))
+                                            {
+                                                TimeOut = 0;
+                                                this.GoToPage(ApplicationPages.Back);
+                                            }
+                                            else
+                                            {
+                                                TimeOut++;
+                                                Pivot_SelectionChanged(sender, e);
+                                            }
                                         }
                                         else
                                         {
-                                            TimeOut++;
-                                            Pivot_SelectionChanged(sender, e);
+                                            FlagPivot = true;
                                         }
                                     }
+
                                     else
                                     {
-                                        FlagPivot = true;
+                                        OnNavigatedTo(null);
                                     }
-                                }
-
-                                else
-                                {
-                                    OnNavigatedTo(null);
-                                }
+                                });
                             });
-                        });
                 }
             }
         }

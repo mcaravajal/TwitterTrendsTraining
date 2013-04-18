@@ -44,6 +44,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="TrendName" Text="{Binding TittleTrend}" TextTrimming="WordEllipsis" Grid.Row="0" FontSize="32" TextAlignment="Center" Grid.Column="0"/>
+                <TextBlock x:Name="Emptylist" Text="No results were found" Grid.Row="1" Visibility="Collapsed" TextAlignment="Center" FontSize="40" Grid.Column="0"/>
                 <ListBox ItemsSource="{Binding Twits}" ItemTemplate="{StaticResource TwitTemplate}" Style="{StaticResource FadingListBox}" Grid.Row="1"/>
             </Grid>
         </DataTemplate>

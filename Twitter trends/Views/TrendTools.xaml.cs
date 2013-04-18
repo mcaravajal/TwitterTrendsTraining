@@ -82,6 +82,7 @@ namespace Twitter_trends
                                     if (aux.place_type_code == 12)
                                         CountryList.Add(aux);
                                 }
+                                StatusLocation.Text = "Total countries: "+ CountryList.Count;
                             });
 
                     },
@@ -177,11 +178,11 @@ namespace Twitter_trends
 
         private void SearchTrends_TextInput(object sender, TextCompositionEventArgs e)
         {
-            
+                EmptyList.Visibility = Visibility.Collapsed;
                 if (SearchTrends.Text != string.Empty)
                 {
                     SearchResults.Focus();
-                    string query = HttpUtility.UrlEncode(SearchTrends.Text);
+                    string query = HttpUtility.UrlEncode("#"+SearchTrends.Text);
                     IsLoadingSearch.Visibility = Visibility.Visible;
                     Dispatcher.BeginInvoke(() =>
                     {
@@ -201,6 +202,7 @@ namespace Twitter_trends
                                 aux.name=x;
                                 ResultList.Add(aux);
                             }
+                            StatusSearch.Text = "Total finded:"+ ResultList.Count.ToString();
                         });
                     },
                     () =>

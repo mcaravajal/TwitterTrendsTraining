@@ -85,6 +85,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Locations.cs" />
     <Compile Include="Services\StateManager.cs" />
+    <Compile Include="Services\TopsyTwit.cs" />
     <Compile Include="Services\Trend.cs" />
     <Compile Include="Services\Twit.cs" />
     <Compile Include="Views\TrendTools.xaml.cs">
@@ -125,13 +126,10 @@
     <None Include="Properties\WMAppManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ApplicationIcon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Background.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Background.png" />
     <Content Include="SplashScreenImage.jpg" />
+    <Resource Include="Images\MainBackGround.jpg" />
+    <Content Include="ApplicationIcon.png" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
