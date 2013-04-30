@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Net.NetworkInformation;
+using Microsoft.Phone.Shell;
 
 namespace Twitter_trends
 {
@@ -82,14 +83,15 @@ namespace Twitter_trends
         }
         #endregion
         #region TimeOut
-        int TimeOut=0;
-#endregion
+        int TimeOut = 0;
+        #endregion
         #region Flags
+        public bool FirstTimeLoaded = false;
         public bool FlagPivot;
-        public static int Action; //1=View only 1 location 2= View List of location 3=View list of trends
-        #endregion 
+        public static int Action; //1=View only 1 location 2= View List of location 3=View list of trends 4= View a single trend
+        #endregion
         #region LoadedTwits
-        public List<Trend> LoadedTrends= new List<Trend>();
+        public List<Trend> LoadedTrends = new List<Trend>();
         #endregion
         public TwitPage()
         {
@@ -97,6 +99,7 @@ namespace Twitter_trends
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
+            FirstTimeLoaded = true;
             if (SelectedLocation != null)
             {
                 if (Action == 1)
@@ -117,7 +120,6 @@ namespace Twitter_trends
                                 Trends.Add(TrendSelected);
                                 CurrentTrend = TrendSelected;
                             });
-
                         }, () =>
                         {
                             Dispatcher.BeginInvoke(() =>
@@ -170,40 +172,20 @@ namespace Twitter_trends
                             {
                                 Dispatcher.BeginInvoke(() =>
                                     {
-                                        if (Trends == null)
+                                        IsLoading.Visibility = Visibility.Collapsed;
+                                        if (SelectedLocation.name != null)
                                         {
-                                            if (App.CheckError(TimeOut))
+                                            foreach (Trend x in Trends)
                                             {
-                                                TimeOut = 0;
-                                                this.GoToPage(ApplicationPages.Back);
-                                            }
-                                            else
-                                            {
-                                                TimeOut++;
-                                                OnNavigatedFrom(null);
-                                            }
-                                        }
-
-                                        else
-                                        {
-                                            IsLoading.Visibility = Visibility.Collapsed;
-                                            if (SelectedLocation.name != null)
-                                            {
-                                                foreach (Trend x in Trends)
+                                                if (x.place_name == SelectedLocation.name)
                                                 {
-                                                    if (x.place_name == SelectedLocation.name)
-                                                    {
-                                                        FlagPivot = true;
-                                                        PivotControl.SelectedItem = x;
-                                                        break;
-                                                    }
+                                                    CurrentTrend = x;
                                                 }
                                             }
-                                            else
-                                            {
-                                                FlagPivot = true;
-                                                PivotControl.SelectedItem = (Trends[0]);
-                                            }
+                                        }
+                                        else
+                                        {
+                                            CurrentTrend = Trends[0];
                                         }
                                     });
                             });
@@ -212,12 +194,12 @@ namespace Twitter_trends
             }
             else
             {
-                if (Action == 3 || Action==4)
+                if (Action == 3 || Action == 4)
                 {
                     Dispatcher.BeginInvoke(() =>
                     {
                         Trends = new ObservableCollection<Trend>();
-                        
+
                         if (GlobalSelectedTrend.slug == null)
                         {
                             if (GlobalSelectedTrend.trend_index == 0)
@@ -225,18 +207,12 @@ namespace Twitter_trends
                                 GlobalSelectedTrend.Header = GlobalSelectedTrend.place_name;
                                 GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.name;
                                 GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
-                                GlobalSelectedTrend.name = null;
                             }
                             else
                             {
                                 GlobalSelectedTrend.TittleTrend = GlobalSelectedTrend.trend_index.ToString();
                                 GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
-                                GlobalSelectedTrend.name = null;
                             }
-                        }
-                        while (GlobalSelectedTrend.slug.StartsWith("+"))
-                        {
-                            GlobalSelectedTrend.slug = GlobalSelectedTrend.slug.Remove(0, 1);
                         }
                         if (Action == 3)
                             Trends = GlobalTrends;
@@ -244,50 +220,37 @@ namespace Twitter_trends
                             Trends.Add(GlobalSelectedTrend);
                         CurrentTrend = GlobalSelectedTrend;
                         FlagPivot = true;
-                        IsLoading.Visibility = Visibility.Collapsed;
                     });
                 }
             }
         }
         private void Pivot_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems[0]!=null)
+            if (e.AddedItems[0] != null)
             {
                 FlagPivot = false;
-                Trend ChangedTo = e.AddedItems[0] as Trend;
-
-                if (ChangedTo.exist(LoadedTrends))
+                Trend AddedTrend = e.AddedItems[0] as Trend;
+                
+                if (AddedTrend.exist(LoadedTrends))
                 {
-                    foreach (Trend x in LoadedTrends)
-                    {
-                        if (x.slug==ChangedTo.slug)
-                        {
-                            FlagPivot = true;
-                            ChangedTo.Twits = x.Twits;
-                            break;
-                        }
-                    }
-                        IsLoading.Visibility= Visibility.Collapsed;
+                    FlagPivot = true;
+                    AddedTrend.TwitResults.results = AddedTrend.Find(LoadedTrends).TwitResults.results;
+                    IsLoading.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     FlagPivot = false;
                     IsLoading.Visibility = Visibility.Visible;
-                    string query = ChangedTo.slug == null ? HttpUtility.UrlEncode(ChangedTo.name) : ChangedTo.slug;
+                    string query = AddedTrend.slug == null ? HttpUtility.UrlEncode(AddedTrend.name) : AddedTrend.slug;
                     ApiTrendService.Search(query,
-                            (results) =>
+                            (Searchresults) =>
                             {
                                 Dispatcher.BeginInvoke(() =>
                                     {
-                                        ChangedTo.Twits = new ObservableCollection<Twit>();
-                                        foreach (Twit x in results)
+                                        AddedTrend.TwitResults = Searchresults;
+                                        if (!AddedTrend.exist(LoadedTrends))
                                         {
-                                            ChangedTo.Twits.Add(x);
-                                        }
-                                        IsLoading.Visibility = Visibility.Collapsed;
-                                        if (!ChangedTo.exist(LoadedTrends))
-                                        {
-                                            LoadedTrends.Add(ChangedTo);
+                                            LoadedTrends.Insert(LoadedTrends.Count,AddedTrend);
                                         }
                                     });
                             },
@@ -295,41 +258,19 @@ namespace Twitter_trends
                             {
                                 Dispatcher.BeginInvoke(() =>
                                 {
-                                    if (Trends != null)
+                                    if (FirstTimeLoaded)
                                     {
-                                        if (ChangedTo == null)
-                                        {
-                                            OnNavigatedTo(null);
-                                        }
-                                        else if (ChangedTo.Twits == null)
-                                        {
-                                            if (App.CheckError(TimeOut))
-                                            {
-                                                TimeOut = 0;
-                                                this.GoToPage(ApplicationPages.Back);
-                                            }
-                                            else
-                                            {
-                                                TimeOut++;
-                                                Pivot_SelectionChanged(sender, e);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            FlagPivot = true;
-                                        }
+                                        CurrentTrend = AddedTrend;
+                                        FirstTimeLoaded = false;
                                     }
-
-                                    else
-                                    {
-                                        OnNavigatedTo(null);
-                                    }
+                                    IsLoading.Visibility = Visibility.Collapsed;
+                                    FlagPivot = true;
                                 });
                             });
                 }
             }
         }
-        protected override void  OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
+        protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
         {
             SelectedLocation = null;
             GlobalSelectedTrend = null;

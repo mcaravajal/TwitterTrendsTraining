@@ -94,6 +94,9 @@
     <Compile Include="Views\TrendTopic.xaml.cs">
       <DependentUpon>TrendTopic.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\TwitList.xaml.cs">
+      <DependentUpon>TwitList.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\TwitPage.xaml.cs">
       <DependentUpon>TwitPage.xaml</DependentUpon>
     </Compile>
@@ -115,6 +118,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\TwitList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\TwitPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -127,6 +134,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Background.png" />
+    <Content Include="Images\appbar.next.rest.png" />
+    <Content Include="Images\appbar.back.rest.png" />
     <Content Include="SplashScreenImage.jpg" />
     <Resource Include="Images\MainBackGround.jpg" />
     <Content Include="ApplicationIcon.png" />

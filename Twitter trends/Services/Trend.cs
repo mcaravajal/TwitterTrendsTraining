@@ -29,8 +29,18 @@ namespace Twitter_trends.Services
     [DataContract]
     public class Trend : INotifyPropertyChanged
     {
-        private ObservableCollection<Twit> _twits;
-        
+        private TwitterResults _TwitResults;
+        public TwitterResults TwitResults {
+            get
+            {
+                return _TwitResults;
+            }
+            set
+            {
+                _TwitResults = value;
+                Twits = _TwitResults.results;
+            }
+        }
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
@@ -65,59 +75,53 @@ namespace Twitter_trends.Services
         [DataMember]
         public string TittleTrend { get; set; }
 
-        /// <summary>
-        /// Gets or sets the twits.
-        /// </summary>
-        /// <value>The twits.</value>
-        public ObservableCollection<Twit> Twits
-        {
-            get { return _twits; }
-            set
-            {
-                if (_twits != value)
-                {
-                    _twits = value;
-                    NotifyPropertyChanged("Twits");
-                }
-            }
-        }
-        /// <summary>
-        /// Determines whether the specified <see cref="System.Object"/> is equal to this instance.
-        /// </summary>
-        /// <param name="obj">The <see cref="System.Object"/> to compare with this instance.</param>
-        /// <returns>
-        /// 	<c>true</c> if the specified <see cref="System.Object"/> is equal to this instance; otherwise, <c>false</c>.
-        /// </returns>
-        #region Property Changed
-
-        /// <summary>
-        /// Notifies the property changed.
-        /// </summary>
-        /// <param name="propertyName">Name of the property.</param>
-        private void NotifyPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
         public bool exist(List<Trend> obj)
         {
             foreach (Trend x in obj)
             {
-                    if (x.slug==this.slug)
+                    if (x.slug==this.slug && x.TwitResults.page==this.TwitResults.page && x.name==this.name)
                     {
                         return true;
                     }
             }
             return false;
         }
+        public Trend Find(List<Trend> obj)
+        {
+            foreach (Trend x in obj)
+            {
+                if (x.slug==this.slug && x.TwitResults.page==this.TwitResults.page)
+                {
+                    return x;
+                }
+            }
+            return null;
+        }
+        #endregion
+        private ObservableCollection<Twit> _Twits;
+        public ObservableCollection<Twit> Twits
+        {
+            get { return _Twits; }
+            set
+            {
+                if (_Twits!=value)
+                {
+                    _Twits = value;
+                    NotifyPropertyChanged("Twits");
+                }
+            }
+        }
+        #region Property Changed
+        public void NotifyPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged = delegate { };
         #endregion
     }
-    #endregion
     #region Results
     /// <summary>
     /// Model for trends results
@@ -125,10 +129,6 @@ namespace Twitter_trends.Services
     [DataContract]
     public class TrendsResults
     {
-        [DataMember]
-        string Nextpage { get; set; }
-        [DataMember]
-        string Previouspage { get; set; }
         [DataMember]
         public Trend[] trends { get; set; }
     }

@@ -14,6 +14,7 @@ using Twitter_trends.Services;
 using System.Collections.ObjectModel;
 using Microsoft.Phone.Net.NetworkInformation;
 using System.IO;
+using Twitter_trends.Views;
 
 namespace Twitter_trends
 {
@@ -115,9 +116,8 @@ namespace Twitter_trends
         }
         private void LocationName_Tap(object sender, GestureEventArgs e)
         {
-            TwitPage.SelectedLocation = ((TextBlock)sender).DataContext as Locations;
-            TwitPage.Action = 1;
-            this.GoToPage(ApplicationPages.Twitter);
+            TwitList.SelectedLocation = ((TextBlock)sender).DataContext as Locations;
+            this.GoToPage(ApplicationPages.TwitList);
         }
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
@@ -162,9 +162,9 @@ namespace Twitter_trends
             Trend selected= ((TextBlock)sender).DataContext as Trend;
             selected.Header = selected.name;
             selected.place_name = "Earth";
-            TwitPage.GlobalSelectedTrend = selected;
-            TwitPage.Action = 4;
-            this.GoToPage(ApplicationPages.Twitter);
+            selected.slug = HttpUtility.UrlEncode(selected.name);
+            TwitList.GlobalTrend = selected;
+            this.GoToPage(ApplicationPages.TwitList);
         }
 
         private void SearchTrends_Tap(object sender, GestureEventArgs e)

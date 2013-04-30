@@ -19,7 +19,7 @@ namespace Twitter_trends
         Tools,
         Main,
         Back,
-        Auth
+        TwitList
     }
     public static class Navigation
     {
@@ -47,8 +47,8 @@ namespace Twitter_trends
                     else
                         phoneApplicationPage.GoToPage(ApplicationPages.Main);
                     break;
-                case ApplicationPages.Auth:
-                    phoneApplicationPage.NavigationService.Navigate(new Uri("/Views/Auth.xaml", UriKind.Relative));
+                case ApplicationPages.TwitList:
+                    phoneApplicationPage.NavigationService.Navigate(new Uri("/Views/TwitList.xaml", UriKind.Relative));
                     break;
 
             }

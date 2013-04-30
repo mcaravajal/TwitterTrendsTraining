@@ -29,11 +29,11 @@
                     <ColumnDefinition Width="0.2*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Image x:Name="Profile_Pic" Source="{Binding profile_image_url}" Grid.Column="0" Stretch="Uniform"/>
-                <StackPanel Orientation="Vertical" Grid.Column="1">
-                <TextBlock x:Name="User" Text="{Binding from_user}" Foreground="DeepSkyBlue" TextAlignment="Left" FontSize="22" />
-                <TextBlock x:Name="Text" Text="{Binding text}" TextWrapping="Wrap" TextAlignment="Left" FontSize="28"/>
-                </StackPanel>
+                        <Image x:Name="Profile_Pic" Source="{Binding profile_image_url}" Grid.Column="0" Stretch="Uniform"/>
+                        <StackPanel Orientation="Vertical" Grid.Column="1">
+                            <TextBlock x:Name="User" Text="{Binding from_user}" Foreground="DeepSkyBlue" TextAlignment="Left" FontSize="22" />
+                            <TextBlock x:Name="Text" Text="{Binding text}" TextWrapping="Wrap" TextAlignment="Left" FontSize="28"/>
+                        </StackPanel>
             </Grid>
         </DataTemplate>
         <!--Trend Template-->
@@ -45,7 +45,7 @@
                 </Grid.RowDefinitions>
                 <TextBlock x:Name="TrendName" Text="{Binding TittleTrend}" TextTrimming="WordEllipsis" Grid.Row="0" FontSize="32" TextAlignment="Center" Grid.Column="0"/>
                 <TextBlock x:Name="Emptylist" Text="No results were found" Grid.Row="1" Visibility="Collapsed" TextAlignment="Center" FontSize="40" Grid.Column="0"/>
-                <ListBox ItemsSource="{Binding Twits}" ItemTemplate="{StaticResource TwitTemplate}" Style="{StaticResource FadingListBox}" Grid.Row="1"/>
+                <ListBox Style="{StaticResource FadingListBox}" Grid.Row="1" ItemsSource="{Binding TwitsList}" ItemTemplate="{StaticResource TwitTemplate}" />
             </Grid>
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
@@ -60,21 +60,22 @@
             x:Name="PivotControl"
             ItemsSource="{Binding Trends}"
             HeaderTemplate="{StaticResource HeaderTemplate}"
-            ItemTemplate="{StaticResource TrendTemplate}"
             SelectionChanged="Pivot_SelectionChanged">
+            <controls:Pivot.ItemTemplate>
+                <DataTemplate>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height=".1*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="TrendName" Text="{Binding TittleTrend}" TextTrimming="WordEllipsis" Grid.Row="0" FontSize="32" TextAlignment="Center" Grid.Column="0"/>
+                    <TextBlock x:Name="Emptylist" Text="No results were found" Grid.Row="1" Visibility="Collapsed" TextAlignment="Center" FontSize="40" Grid.Column="0"/>
+                    <ListBox Style="{StaticResource FadingListBox}" Grid.Row="1" ItemsSource="{Binding Twits}" ItemTemplate="{StaticResource TwitTemplate}" />
+                </Grid>
+                </DataTemplate>
+            </controls:Pivot.ItemTemplate>
         </controls:Pivot>
     </Grid>
 
-    <!--Sample code showing usage of ApplicationBar-->
-    <!--<phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton x:Name="appbar_button1" IconUri="/Images/appbar_button1.png" Text="Button 1"/>
-            <shell:ApplicationBarIconButton x:Name="appbar_button2" IconUri="/Images/appbar_button2.png" Text="Button 2"/>
-            <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem x:Name="menuItem1" Text="MenuItem 1"/>
-                <shell:ApplicationBarMenuItem x:Name="menuItem2" Text="MenuItem 2"/>
-            </shell:ApplicationBar.MenuItems>
-        </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
     
 </phone:PhoneApplicationPage>

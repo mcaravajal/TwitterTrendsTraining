@@ -17,6 +17,8 @@
 using System;
 using System.Runtime.Serialization;
 using System.Net;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Twitter_trends
 {
@@ -73,12 +75,12 @@ namespace Twitter_trends
     [DataContract]
     public class TwitterResults
     {
-        /// <summary>
-        /// Gets or sets the results.
-        /// </summary>
-        /// <value>The results.</value>
         [DataMember]
-        public Twit[] results { get; set; }
+        public string next_page { get; set; }
+        [DataMember]
+        public int page { get; set; }
+        [DataMember]
+        public ObservableCollection<Twit> results{get;set;}
     }
 }
 
