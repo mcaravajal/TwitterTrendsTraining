@@ -35,7 +35,7 @@ namespace Twitter_trends
             get { return (ObservableCollection<Locations>)GetValue(CountryProperty); }
             set { SetValue(CountryProperty, value); }
         }
-
+        public static ObservableCollection<Locations> GlobalCountryList;
         #endregion
         #region Filter
 
@@ -58,8 +58,25 @@ namespace Twitter_trends
             set { SetValue(ResultProperty, value); }
         }
         #endregion
+        #region Isloading
+        public static readonly DependencyProperty IsLoadingProp =
+            DependencyProperty.Register("IsLoading", typeof(bool), typeof(TrendTools),
+            new PropertyMetadata((bool)false));
+        public bool IsLoading
+        {
+            get { return (bool)GetValue(IsLoadingProp); }
+            set { SetValue(IsLoadingProp, value); }
+        }
+        public static readonly DependencyProperty IsLoadingSearchProp =
+            DependencyProperty.Register("IsLoadingSearch", typeof(bool), typeof(TrendTools),
+            new PropertyMetadata((bool)false));
+        public bool IsLoadingSearch
+        {
+            get { return (bool)GetValue(IsLoadingSearchProp); }
+            set { SetValue(IsLoadingSearchProp, value); }
+        }
+        #endregion
         #region Timeouts
-        int Timeout = 0;
         int TimeoutSearch = 0;
         #endregion
         protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
@@ -69,48 +86,42 @@ namespace Twitter_trends
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             var state = this.LoadState<ObservableCollection<Locations>>("TrendTools");
-            if (state == null)
+            if (state == null && GlobalCountryList == null)
             {
-                IsLoading.Visibility = Visibility.Visible;
+                IsLoading = true;
                 ApiTrendService.GetLocations(
                     (results) =>
                     {
                         Dispatcher.BeginInvoke(() =>
                             {
+
                                 CountryList = new ObservableCollection<Locations>();
                                 foreach (Locations aux in results)
                                 {
                                     if (aux.place_type_code == 12)
                                         CountryList.Add(aux);
                                 }
-                                StatusLocation.Text = "Total countries: "+ CountryList.Count;
+                                StatusLocation.Text = "Total countries: " + CountryList.Count;
                             });
-
                     },
                     () =>
                     {
                         Dispatcher.BeginInvoke(() =>
                             {
-                                if (CountryList == null)
-                                {
-                                    if (App.CheckError(Timeout))
-                                    {
-                                        Timeout = 0;
-                                        this.GoToPage(ApplicationPages.Back);
-                                    }
-                                    else
-                                    {
-                                        Timeout++;
-                                        //Call this function again until we get the results or the timeout reach the limit
-                                        OnNavigatedTo(null);
-                                    }
-                                }
-                                else
-                                {
-                                    Timeout = 0;
-                                    IsLoading.Visibility = Visibility.Collapsed;
-                                }
+                                IsLoading = false;
                             });
+                    });
+            }
+            else
+            {
+                Dispatcher.BeginInvoke(() =>
+                    {
+                        if (GlobalCountryList != null)
+                            CountryList = GlobalCountryList;
+                        else
+                            CountryList = state;
+                        Country.ItemsSource = CountryList;
+                        IsLoading=false;
                     });
             }
         }
@@ -122,26 +133,19 @@ namespace Twitter_trends
 
         private void Search_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (CountryList != null && Search.Text.Length >= 2)
+            if (CountryList != null && Search.Text.Length >= 2 && Search.Text!="Insert Location")
             {
-                IsLoading.Visibility = Visibility.Visible;
+                IsLoading=true;
                 FilterListAction(Search.Text);
                 Country.ItemsSource = FilterList;
-                IsLoading.Visibility = Visibility.Collapsed;
+                IsLoading = false;
             }
-            else if (Search.Text == string.Empty)
+            else if (Search.Text == string.Empty || SearchTrends.Text == "Insert Location")
             {
                 Country.ItemsSource = CountryList;
             }
         }
 
-        private void Search_Tap(object sender, GestureEventArgs e)
-        {
-            if (Search.Text == "Insert location")
-            {
-                Search.Text = string.Empty;
-            }
-        }
         private void FilterListAction(string query)
         {
             if (CountryList != null)
@@ -167,23 +171,14 @@ namespace Twitter_trends
             this.GoToPage(ApplicationPages.TwitList);
         }
 
-        private void SearchTrends_Tap(object sender, GestureEventArgs e)
-        {
-            SearchTrends.Focus();
-            if (SearchTrends.Text == "Search Trend")
-            {
-                SearchTrends.Text = string.Empty;
-            }
-        }
-
         private void SearchTrends_TextInput(object sender, TextCompositionEventArgs e)
         {
                 EmptyList.Visibility = Visibility.Collapsed;
-                if (SearchTrends.Text != string.Empty)
+                if (SearchTrends.Text != string.Empty && SearchTrends.Text!="Insert Trend")
                 {
                     SearchResults.Focus();
                     string query = HttpUtility.UrlEncode("#"+SearchTrends.Text);
-                    IsLoadingSearch.Visibility = Visibility.Visible;
+                    IsLoadingSearch=true;
                     Dispatcher.BeginInvoke(() =>
                     {
                     if (ResultList == null)
@@ -224,7 +219,7 @@ namespace Twitter_trends
                             else
                             {
                                 TimeoutSearch = 0;
-                                IsLoadingSearch.Visibility = Visibility.Collapsed;
+                                IsLoadingSearch=false;
                             }
                         });
                     });
@@ -240,7 +235,7 @@ namespace Twitter_trends
         {
             if (Search.Text == string.Empty)
             {
-                Search.Text = "Insert Locations";
+                Search.Text = "Insert Location";
             }
         }
 
@@ -250,6 +245,22 @@ namespace Twitter_trends
             {
                 StatusSearch.Text = "Insert Trend";
                 StatusSearch.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void Search_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (Search.Text=="Insert Location")
+            {
+                Search.Text = string.Empty;
+            }
+        }
+
+        private void SearchTrends_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if (SearchTrends.Text == "Insert Trend")
+            {
+                SearchTrends.Text = string.Empty;
             }
         }
     }

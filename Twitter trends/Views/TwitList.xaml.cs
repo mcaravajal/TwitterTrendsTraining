@@ -13,6 +13,7 @@ using Microsoft.Phone.Controls;
 using System.Collections.ObjectModel;
 using Twitter_trends.Services;
 using Microsoft.Phone.Shell;
+using System.Windows.Media.Imaging;
 
 namespace Twitter_trends.Views
 {
@@ -51,21 +52,32 @@ namespace Twitter_trends.Views
         #region LoadedResults
         public List<TwitterResults> LoadedResults;
         #endregion
-        #region IsLoading
-        Visibility isLoading;
+        #region IsBusy
+        bool IsBusy;
         #endregion
         #region LocationSelected
         static public Locations SelectedLocation;
+        #endregion
+        #region IsLoading
+        public static readonly DependencyProperty IsLoadingProp =
+            DependencyProperty.Register("IsLoading", typeof(bool), typeof(TwitList),
+            new PropertyMetadata((bool)false));
+        public bool IsLoading
+        {
+            get { return (bool)GetValue(IsLoadingProp); }
+            set { SetValue(IsLoadingProp, value); }
+        }
         #endregion
         public TwitList()
         {
             InitializeComponent();
             LoadedResults = new List<TwitterResults>();
+            
         }
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             ApplicationBar.IsVisible = false;
-            Loading.Visibility = Visibility.Visible;
+            IsLoading = true;
             if (GlobalTrend == null && SelectedLocation == null)
             {
                 this.GoToPage(ApplicationPages.Back);
@@ -107,7 +119,7 @@ namespace Twitter_trends.Views
         }
         private void Change_Page_Click(object sender, EventArgs e)
         {
-            Loading.Visibility = Visibility.Visible;
+            IsLoading = true;
             ApplicationBarIconButton button = sender as ApplicationBarIconButton;
             if (button.Text == "Next")
             {
@@ -135,8 +147,7 @@ namespace Twitter_trends.Views
             {
                 //Get the list which must be loaded, MUST BE LOADED
                 TwitterResults NewResults= LoadedResults.FirstOrDefault<TwitterResults>(x=>x.page==CurrentResults.page-1);
-                Loading.Visibility = Visibility.Visible;
-
+                IsLoading = true;
                 if (NewResults != null)
                 {
                     Result(NewResults);
@@ -154,7 +165,6 @@ namespace Twitter_trends.Views
                 Twits.Focus();
             });
         }
-
         private void Finally()
         {
             Dispatcher.BeginInvoke(() =>
@@ -162,7 +172,7 @@ namespace Twitter_trends.Views
                 if (!LoadedResults.Contains(CurrentResults))
                     LoadedResults.Add(CurrentResults);
                 
-                if (CurrentResults.next_page == null || CurrentResults.results.Count<95)
+                if (CurrentResults.next_page == null || CurrentResults.results.Count<18)
                     (ApplicationBar.Buttons[1] as ApplicationBarIconButton).IsEnabled = false;
                 else
                     (ApplicationBar.Buttons[1] as ApplicationBarIconButton).IsEnabled = true;
@@ -172,9 +182,43 @@ namespace Twitter_trends.Views
                 else
                     (ApplicationBar.Buttons[0] as ApplicationBarIconButton).IsEnabled = true;
 
-                Loading.Visibility = Visibility.Collapsed;
+                IsLoading = false;
                 ApplicationBar.IsVisible = true;
+                if (!IsBusy && CurrentResults.next_page!=null)
+                {
+                    LoadAsync(CurrentResults.next_page.Substring(5));
+                }
+                Twits.UpdateLayout();
             });
+        }
+        #endregion
+        #region Async method
+        public void LoadAsync(string query)
+        {
+            IsBusy = true;
+            //Find the service to search
+            if (CurrentResults.next_page.StartsWith("topsy"))
+            {
+                ApiTrendService.SearchOlderResults(query, (SearchResults) =>
+                    {
+                        if (!LoadedResults.Contains(SearchResults))
+                            LoadedResults.Add(SearchResults);
+                    }, () =>
+                    {
+                        IsBusy = false;
+                    });
+            }
+            else if (CurrentResults.next_page.StartsWith("twitt"))
+            {
+                ApiTrendService.Search(query, (SearchResults) =>
+                {
+                    if (!LoadedResults.Contains(SearchResults))
+                        LoadedResults.Add(SearchResults);
+                }, () =>
+                    {
+                        IsBusy = false;
+                    });
+            }
         }
         #endregion
     }

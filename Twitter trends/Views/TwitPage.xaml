@@ -7,12 +7,13 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
+    xmlns:localHelpers="clr-namespace:Twitter_trends.Helpers"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait"  Orientation="Portrait"
-    shell:SystemTray.IsVisible="True"
+    shell:SystemTray.IsVisible="False"
     DataContext="{Binding RelativeSource={RelativeSource self}}">
 
     <phone:PhoneApplicationPage.Resources>
@@ -43,19 +44,17 @@
                     <RowDefinition Height=".1*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
+                
                 <TextBlock x:Name="TrendName" Text="{Binding TittleTrend}" TextTrimming="WordEllipsis" Grid.Row="0" FontSize="32" TextAlignment="Center" Grid.Column="0"/>
                 <TextBlock x:Name="Emptylist" Text="No results were found" Grid.Row="1" Visibility="Collapsed" TextAlignment="Center" FontSize="40" Grid.Column="0"/>
-                <ListBox Style="{StaticResource FadingListBox}" Grid.Row="1" ItemsSource="{Binding TwitsList}" ItemTemplate="{StaticResource TwitTemplate}" />
+                <ListBox Grid.Row="1" ItemsSource="{Binding TwitsList}" ItemTemplate="{StaticResource TwitTemplate}" />
             </Grid>
         </DataTemplate>
     </phone:PhoneApplicationPage.Resources>
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <!--Pivot Control-->
-        <StackPanel Orientation="Vertical" x:Name="IsLoading" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-            <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="22" />
-            <ProgressBar IsIndeterminate="True" Foreground="DeepSkyBlue" FontSize="32"/>
-        </StackPanel>
+        <localHelpers:ProgressBarWithText ShowProgress="{Binding IsLoading}" VerticalAlignment="Top" />
         <controls:Pivot 
             x:Name="PivotControl"
             ItemsSource="{Binding Trends}"
@@ -70,11 +69,11 @@
                     </Grid.RowDefinitions>
                     <TextBlock x:Name="TrendName" Text="{Binding TittleTrend}" TextTrimming="WordEllipsis" Grid.Row="0" FontSize="32" TextAlignment="Center" Grid.Column="0"/>
                     <TextBlock x:Name="Emptylist" Text="No results were found" Grid.Row="1" Visibility="Collapsed" TextAlignment="Center" FontSize="40" Grid.Column="0"/>
-                    <ListBox Style="{StaticResource FadingListBox}" Grid.Row="1" ItemsSource="{Binding Twits}" ItemTemplate="{StaticResource TwitTemplate}" />
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Twits}" ItemTemplate="{StaticResource TwitTemplate}" />
                 </Grid>
                 </DataTemplate>
             </controls:Pivot.ItemTemplate>
-        </controls:Pivot>
+      </controls:Pivot>
     </Grid>
 
     

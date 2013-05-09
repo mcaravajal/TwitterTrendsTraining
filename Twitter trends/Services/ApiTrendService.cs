@@ -22,10 +22,8 @@ namespace Twitter_trends
 {
     public static class ApiTrendService
     {
-        public const string CustomerKey = "jemspqjwrsvuII3CRRfg";
-        public const string customerSecret = "FiNZDWSEgdYpT5bIubVT7EzUg8KoOmJ3wseewdyO9Yk";
-        const string Token = "158125533-xr2HQyH8UoyckOVSJ8vbk0tFFN7bQEbYTOvKClPF";
-        const string TokenSecret = "69c8uGnrjDG8OafO3pCC93MpXtqjrzaViVaH970DgoM";
+        #region Const strings
+        //These strings contain the info to build a URI
         const string ApiKey = "af6b4e5630d3be1bad95813cf7058cfc6c52d82a";
         const string SearchUri = "http://search.twitter.com/search.json";
         const string SimpleSearchUri = "trend/search?api_key=";
@@ -36,8 +34,13 @@ namespace Twitter_trends
         const string TopsyApi = "http://otter.topsy.com/";
         const string TopsyKey = "EQXRTO2PMDZ5UZJHJQLAAAAAAB35CHNZS5IQAAAAAAAFQGYA";
         const string TopsySearch = "search.json?apikey=" + TopsyKey + "&q=";
-
-
+        #endregion
+        /// <summary>
+        /// Get Trends from the WhatTheTrend's API
+        /// </summary>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="OnError">Any error wil execute this action</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void GetTrends(Action<IEnumerable<Trend>> Results = null, Action<Exception> OnError = null, Action Finally = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(BaseAddres + GetTrendsUri + ApiKey);
@@ -53,6 +56,12 @@ namespace Twitter_trends
                 }
             }, request);
         }
+        /// <summary>
+        /// Get trends with a location name from the WhatTheTrend's API
+        /// </summary>
+        /// <param name="Location_type">The type of Location, City or Country</param>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void GetTrendsFromLocation(int Location_type, Action<IEnumerable<Trend>> Results = null, Action Finally = null)
         {
 
@@ -71,6 +80,12 @@ namespace Twitter_trends
                 }
             }, request);
         }
+        /// <summary>
+        /// Get only 1 trend from a location
+        /// </summary>
+        /// <param name="Loc">The location where we want to find the trend</param>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void GetSingleTrendsFromLocation(Locations Loc, Action<Trend> Result = null, Action Finally = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(BaseAddres + GetTrendByLocation + Loc.place_type_code);
@@ -90,6 +105,11 @@ namespace Twitter_trends
                 }
             }, request);
         }
+        /// <summary>
+        /// Get the list of locations available on the WhatTheTrend' API
+        /// </summary>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void GetLocations(Action<IEnumerable<Locations>> Results = null, Action Finally = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(BaseAddres + locationAll);
@@ -105,6 +125,12 @@ namespace Twitter_trends
                 }
             }, request);
         }
+        /// <summary>
+        /// Search Twits from the Twitter's API
+        /// </summary>
+        /// <param name="search">The text which we want to search</param>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void Search(string search, Action<TwitterResults> Results = null, Action Finally = null)
         {
             HttpWebRequest request;
@@ -114,29 +140,42 @@ namespace Twitter_trends
             }
             else
             {
-                request = (HttpWebRequest)WebRequest.Create(SearchUri +"?q="+ search + "&rpp=100");
+                request = (HttpWebRequest)WebRequest.Create(SearchUri +"?q="+ search + "&rpp=20");
             }
              
             request.BeginGetResponse(a =>
             {
-                var responseStream = request.EndGetResponse(a).GetResponseStream();
-                DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(TwitterResults));
-                TwitterResults Result = new TwitterResults();
-                Result.results = new ObservableCollection<Twit>();
-                Result= json.ReadObject(responseStream) as TwitterResults;
-                if (Result.results.Count <= 0)
+                try
                 {
-                    SearchOlderResults(search, Results, Finally);
-                    return;
+                    var responseStream = request.EndGetResponse(a).GetResponseStream();
+                    DataContractJsonSerializer json = new DataContractJsonSerializer(typeof(TwitterResults));
+                    TwitterResults Result = new TwitterResults();
+                    Result.results = new ObservableCollection<Twit>();
+                    Result = json.ReadObject(responseStream) as TwitterResults;
+                    if (Result.results.Count <= 0)
+                    {
+                        SearchOlderResults(search, Results, Finally);
+                        return;
+                    }
+                    if (Results != null)
+                    {
+                        Result.next_page = Result.next_page == null ? null : "twitt" + Result.next_page;
+                        Results(Result);
+                        Finally();
+                    }
                 }
-                if (Results != null)
+                catch (Exception)
                 {
-                    Result.next_page = Result.next_page==null ? null : "twitt" +Result.next_page;
-                    Results(Result);
                     Finally();
                 }
             }, request);
         }
+        /// <summary>
+        /// Get a text list with the results
+        /// </summary>
+        /// <param name="search">The text which we want to search</param>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void SimpleSearch(string search, Action<IEnumerable<String>> Results = null, Action Finally = null)
         {
             var request = (HttpWebRequest)WebRequest.Create(BaseAddres + SimpleSearchUri + ApiKey + "&q=" + search);
@@ -152,9 +191,15 @@ namespace Twitter_trends
                 }
             }, request);
         }
+        /// <summary>
+        /// This search will include twits older than a week ago from the Topsy's API
+        /// </summary>
+        /// <param name="search">The text which we want to search</param>
+        /// <param name="Results">The action when the request finished including the results</param>
+        /// <param name="Finally">The action will run when the method ends</param>
         public static void SearchOlderResults(string search, Action<TwitterResults> Results = null, Action Finally = null)
         {
-            var request = (HttpWebRequest)WebRequest.Create(TopsyApi + TopsySearch + search + "&perpage=100");
+            var request = (HttpWebRequest)WebRequest.Create(TopsyApi + TopsySearch + search + "&perpage=20");
             request.BeginGetResponse(a =>
             {
                 var responseStream = request.EndGetResponse(a).GetResponseStream();

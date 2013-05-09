@@ -88,7 +88,17 @@ namespace Twitter_trends
         #region Flags
         public bool FirstTimeLoaded = false;
         public bool FlagPivot;
-        public static int Action; //1=View only 1 location 2= View List of location 3=View list of trends 4= View a single trend
+        public static int Action; //1=View List of location 2=View list of trends
+        #endregion
+        #region IsLoading
+        public static readonly DependencyProperty IsLoadingProp = 
+            DependencyProperty.Register("IsLoading", typeof(bool), typeof(TwitPage),
+            new PropertyMetadata((bool)false));
+        public bool IsLoading
+        {
+            get { return (bool)GetValue(IsLoadingProp); }
+            set { SetValue(IsLoadingProp, value); }
+        }
         #endregion
         #region LoadedTwits
         public List<Trend> LoadedTrends = new List<Trend>();
@@ -100,50 +110,15 @@ namespace Twitter_trends
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             FirstTimeLoaded = true;
-            if (SelectedLocation != null)
+            if (Action==1)
             {
-                if (Action == 1)
-                {
-                    Trend TrendSelected = null;
-                    Locations taped = SelectedLocation;
-                    ApiTrendService.GetSingleTrendsFromLocation(taped,
-                        (result) =>
-                        {
-                            Dispatcher.BeginInvoke(() =>
-                            {
-                                TrendSelected = result;
-                                TrendSelected.place_name = taped.name;
-                                TrendSelected.slug = null;
-                                TrendSelected.Header = TrendSelected.place_name;
-                                TrendSelected.TittleTrend = TrendSelected.name;
-                                Trends = new ObservableCollection<Trend>();
-                                Trends.Add(TrendSelected);
-                                CurrentTrend = TrendSelected;
-                            });
-                        }, () =>
-                        {
-                            Dispatcher.BeginInvoke(() =>
-                            {
-                                if (TrendSelected == null)
-                                {
-                                    if (App.CheckError(TimeOut))
-                                    {
-                                        TimeOut = 0;
-                                        this.GoToPage(ApplicationPages.Back);
-                                    }
-                                    else
-                                        TimeOut++;
-                                }
-                            });
-                        });
-                }
-                else
+                if (SelectedLocation!=null)
                 {
                     var status = this.LoadState<ObservableCollection<Trend>>("TwitPage");
-                    if (status == null)
+                    if (status == null && GlobalTrends==null)
                     {
                         FlagPivot = false;
-                        IsLoading.Visibility = Visibility.Visible;
+                        IsLoading= true;
                         ApiTrendService.GetTrendsFromLocation(SelectedLocation.place_type_code,
                             (results) =>
                             {
@@ -170,31 +145,25 @@ namespace Twitter_trends
                             },
                             () =>
                             {
-                                Dispatcher.BeginInvoke(() =>
-                                    {
-                                        IsLoading.Visibility = Visibility.Collapsed;
-                                        if (SelectedLocation.name != null)
-                                        {
-                                            foreach (Trend x in Trends)
-                                            {
-                                                if (x.place_name == SelectedLocation.name)
-                                                {
-                                                    CurrentTrend = x;
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            CurrentTrend = Trends[0];
-                                        }
-                                    });
+                                Dispatcher.BeginInvoke(() => IsLoading= false);
+                            });
+                    }
+                    else
+                    {
+                        Dispatcher.BeginInvoke(() =>
+                            {
+                                if (status != null)
+                                    Trends = status;
+                                else
+                                    Trends = GlobalTrends;
+                                PivotControl.SelectedItem = Trends[0];
                             });
                     }
                 }
             }
             else
             {
-                if (Action == 3 || Action == 4)
+                if (Action ==2)
                 {
                     Dispatcher.BeginInvoke(() =>
                     {
@@ -214,10 +183,7 @@ namespace Twitter_trends
                                 GlobalSelectedTrend.slug = HttpUtility.UrlEncode(GlobalSelectedTrend.name);
                             }
                         }
-                        if (Action == 3)
-                            Trends = GlobalTrends;
-                        else
-                            Trends.Add(GlobalSelectedTrend);
+                        Trends = GlobalTrends;
                         CurrentTrend = GlobalSelectedTrend;
                         FlagPivot = true;
                     });
@@ -235,12 +201,12 @@ namespace Twitter_trends
                 {
                     FlagPivot = true;
                     AddedTrend.TwitResults.results = AddedTrend.Find(LoadedTrends).TwitResults.results;
-                    IsLoading.Visibility = Visibility.Collapsed;
+                    IsLoading=true;
                 }
                 else
                 {
                     FlagPivot = false;
-                    IsLoading.Visibility = Visibility.Visible;
+                    IsLoading= true;
                     string query = AddedTrend.slug == null ? HttpUtility.UrlEncode(AddedTrend.name) : AddedTrend.slug;
                     ApiTrendService.Search(query,
                             (Searchresults) =>
@@ -263,7 +229,7 @@ namespace Twitter_trends
                                         CurrentTrend = AddedTrend;
                                         FirstTimeLoaded = false;
                                     }
-                                    IsLoading.Visibility = Visibility.Collapsed;
+                                    IsLoading= false;
                                     FlagPivot = true;
                                 });
                             });

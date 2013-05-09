@@ -40,6 +40,17 @@ namespace Twitter_trends
             get { return (ObservableCollection<Trend>)GetValue(TrendsProperty); }
             set { SetValue(TrendsProperty, value); }
         }
+        public static ObservableCollection<Trend> GlobalTrends;
+        #endregion
+        #region IsLoading
+        public static readonly DependencyProperty IsLoadingProp =
+            DependencyProperty.Register("IsLoading", typeof(bool), typeof(TrendTopic),
+            new PropertyMetadata((bool)false));
+        public bool IsLoading
+        {
+            get { return (bool)GetValue(IsLoadingProp); }
+            set { SetValue(IsLoadingProp, value); }
+        }
         #endregion
         string TrendingTopic = "TrendingTopic";
         public TrendTopic()
@@ -50,56 +61,41 @@ namespace Twitter_trends
         protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
         {
             trends = this.LoadState<ObservableCollection<Trend>>(TrendingTopic);
-            if (trends == null)
+            if (trends == null && GlobalTrends == null)
             {
-
                 trends = new ObservableCollection<Trend>();
-                IsLoading.Visibility = Visibility.Visible;
+                IsLoading = true;
                 ApiTrendService.GetTrends(
-                    //When it finish the loading
-                    (results)=>
-                    {
-                        Dispatcher.BeginInvoke(() =>{ 
-                        foreach (Trend x in results)
-                        {
-                            if (x.slug==null)
-                            {
-                                x.slug = HttpUtility.UrlEncode(x.name);
-                                x.TittleTrend = x.name;
-                                x.Header = x.trend_index.ToString();
-                            }
-                            trends.Add(x); 
-                        }
-                        });
-                    },
-                    //If something is wrong
-                    delegate(Exception ex)
-                    {
-                        IsLoading.Visibility = Visibility.Collapsed;
-                    },
-                    //Check if the results are Ok
-                    delegate()
+                    (results) =>
                     {
                         Dispatcher.BeginInvoke(() =>
                         {
-                            if (trends == null)
+                            foreach (Trend x in results)
                             {
-                                if (App.CheckError(Timeout))
+                                if (x.slug == null)
                                 {
-                                    Timeout = 0;
-                                    this.GoToPage(ApplicationPages.Back);
+                                    x.slug = HttpUtility.UrlEncode(x.name);
+                                    x.TittleTrend = x.name;
+                                    x.Header = x.trend_index.ToString();
                                 }
-                                else
-                                {
-                                    Timeout++;
-                                    //Call this function again until we get the results or the timeout reach the limit
-                                    OnNavigatedTo(null);
-                                }
+                                trends.Add(x);
                             }
-                            else
-                                IsLoading.Visibility = Visibility.Collapsed;
                         });
+                    },
+                    (ex) =>
+                    {
+                        IsLoading = false;
+                    },
+                    () =>
+                    {
+                        Dispatcher.BeginInvoke(() => IsLoading = false);
                     });
+            }
+            else
+            {
+                if (GlobalTrends != null)
+                    trends = GlobalTrends;
+
             }
         }
         protected override void OnNavigatedFrom(System.Windows.Navigation.NavigationEventArgs e)
@@ -112,7 +108,7 @@ namespace Twitter_trends
             Trend selected = block.DataContext as Trend;
             TwitPage.GlobalTrends = trends;
             TwitPage.GlobalSelectedTrend = selected;
-            TwitPage.Action = 3;
+            TwitPage.Action = 2;
             this.GoToPage(ApplicationPages.Twitter);
         }
     }

@@ -7,6 +7,7 @@
     xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+    xmlns:localHelpers="clr-namespace:Twitter_trends.Helpers"
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="800"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
@@ -29,19 +30,18 @@
 
             <!--Panorama item one-->
             <controls:PanoramaItem Header="Locations">
-                <Grid>
+                <Grid >
                     <Grid.RowDefinitions>
                         <RowDefinition Height=".3*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                    
                     <StackPanel Orientation="Vertical">
-                        <TextBox x:Name="Search" Text="Insert location" TextChanged="Search_TextChanged" Tap="Search_Tap" TabIndex="0" Grid.Row="0" LostFocus="Search_LostFocus" Margin="-9,0,0,0"/>
+                        <TextBox x:Name="Search" Text="Insert Location" TextChanged="Search_TextChanged" TabIndex="0" Grid.Row="0" LostFocus="Search_LostFocus" Margin="-9,0,0,0" GotFocus="Search_GotFocus" />
+                        <localHelpers:ProgressBarWithText ShowProgress="{Binding IsLoading}" Margin="0,2,0,0"/>
                     <TextBlock x:Name="StatusLocation" Visibility="Visible" Grid.Row="0" FontSize="26" VerticalAlignment="Center" Text="Search any Location" Padding="1,0,0,0" />
                     </StackPanel>
-                    <StackPanel Orientation="Vertical" x:Name="IsLoading" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1">
-                        <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="22" />
-                        <ProgressBar IsIndeterminate="True" Foreground="DeepSkyBlue" FontSize="32"/>
-                    </StackPanel>
+                    
                      <ListBox x:Name="Country" ItemsSource="{Binding CountryList}" ItemTemplate="{StaticResource LocationsTemplate}" Grid.Row="1"/>
                 </Grid>
             </controls:PanoramaItem>
@@ -53,17 +53,16 @@
                         <RowDefinition Height=".3*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                    
                     <StackPanel Orientation="Vertical">
-                    <TextBox x:Name="SearchTrends" Text="Search Trend" Grid.Row="0" TabIndex="0" Tap="SearchTrends_Tap" TextInput="SearchTrends_TextInput" LostFocus="SearchTrends_LostFocus" Padding="0" Margin="-9,0,0,0" />
+                    <TextBox x:Name="SearchTrends" Text="Search Trend" Grid.Row="0" TabIndex="0" GotFocus="SearchTrends_GotFocus" TextInput="SearchTrends_TextInput" LostFocus="SearchTrends_LostFocus" Padding="0" Margin="-9,0,0,0" />
+                        <localHelpers:ProgressBarWithText ShowProgress="{Binding IsLoadingSearch}" Margin="0,2,0,0"/>
                     <TextBlock x:Name="StatusSearch" Visibility="Visible" Grid.Row="0" FontSize="26" VerticalAlignment="Center" Text="Search any trend" Padding="1,0,0,0" />
                     </StackPanel>
                     <StackPanel Orientation="Vertical" x:Name="EmptyList" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Visibility="Visible">
                         <TextBlock Text="Insert something to search!!" HorizontalAlignment="Center" FontSize="22" />
                     </StackPanel>
-                    <StackPanel Orientation="Vertical" x:Name="IsLoadingSearch" HorizontalAlignment="Stretch" VerticalAlignment="Center" Grid.Row="1" Visibility="Collapsed">
-                        <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="22" />
-                        <ProgressBar IsIndeterminate="True" Foreground="DeepSkyBlue" FontSize="32"/>
-                    </StackPanel>
+                    
                     <ListBox x:Name="SearchResults" ItemsSource="{Binding ResultList}" ItemTemplate="{StaticResource SearchListTemplate}" Grid.Row="1" />
                 </Grid>
             </controls:PanoramaItem>

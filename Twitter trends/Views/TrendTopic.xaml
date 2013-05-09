@@ -6,12 +6,13 @@
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:localHelpers="clr-namespace:Twitter_trends.Helpers"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
     SupportedOrientations="Portrait" Orientation="Portrait"
     mc:Ignorable="d" d:DesignHeight="768" d:DesignWidth="480"
-    shell:SystemTray.IsVisible="True"
+    shell:SystemTray.IsVisible="False"
     DataContext="{Binding RelativeSource={RelativeSource self}}">
 
     <phone:PhoneApplicationPage.Resources>
@@ -36,26 +37,10 @@
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28" Orientation="Vertical">
             <TextBlock x:Name="PageTitle" Text="Top Trends" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}" Width="Auto" />
-            <StackPanel Orientation="Vertical" x:Name="IsLoading" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                <TextBlock Text="Loading..." HorizontalAlignment="Center" FontSize="22" />
-                <ProgressBar IsIndeterminate="True" Foreground="DeepSkyBlue" FontSize="32"/>
-            </StackPanel>
+            <localHelpers:ProgressBarWithText ShowProgress="{Binding IsLoading}" VerticalAlignment="Top" />
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
         <ListBox ItemTemplate="{StaticResource ListTemplate}"  ItemsSource="{Binding trends}"  x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0" />
     </Grid>
- 
-    <!--Sample code showing usage of ApplicationBar-->
-    <!--<phone:PhoneApplicationPage.ApplicationBar>
-        <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button1.png" Text="Button 1"/>
-            <shell:ApplicationBarIconButton IconUri="/Images/appbar_button2.png" Text="Button 2"/>
-            <shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
-                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
-            </shell:ApplicationBar.MenuItems>
-        </shell:ApplicationBar>
-    </phone:PhoneApplicationPage.ApplicationBar>-->
-
 </phone:PhoneApplicationPage>

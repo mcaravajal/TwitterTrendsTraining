@@ -74,6 +74,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\LinkLabel\Link.cs" />
+    <Compile Include="Helpers\LinkLabel\LinkClickedEventArgs.cs" />
+    <Compile Include="Helpers\LinkLabel\LinkCollection.cs" />
+    <Compile Include="Helpers\LinkLabel\LinkLabel.cs" />
+    <Compile Include="Helpers\LinkLabel\LinkMatchMethod.cs" />
+    <Compile Include="Helpers\ProgressBar\BooleanToVisibilityConverter.cs" />
+    <Compile Include="Helpers\ProgressBar\ProgressBarWithText.xaml.cs">
+      <DependentUpon>ProgressBarWithText.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\ProgressBar\RelativeAnimatingContentControl.cs" />
+    <Compile Include="Helpers\WrapPanel\LengthConverter.cs" />
+    <Compile Include="Helpers\WrapPanel\NumericExtensions.cs" />
+    <Compile Include="Helpers\WrapPanel\OrientedSize.cs" />
+    <Compile Include="Helpers\WrapPanel\TypeConverters.cs" />
+    <Compile Include="Helpers\WrapPanel\WrapPanel.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="Services\ApiTrendService.cs" />
     <Compile Include="App.xaml.cs">
@@ -106,6 +121,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="Helpers\ProgressBar\ProgressBarWithText.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -136,6 +155,7 @@
     <Content Include="Background.png" />
     <Content Include="Images\appbar.next.rest.png" />
     <Content Include="Images\appbar.back.rest.png" />
+    <Content Include="Images\Solid_Blude1.jpg" />
     <Content Include="SplashScreenImage.jpg" />
     <Resource Include="Images\MainBackGround.jpg" />
     <Content Include="ApplicationIcon.png" />
@@ -143,9 +163,7 @@
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
